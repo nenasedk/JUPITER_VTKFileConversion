@@ -174,17 +174,20 @@ class DATtoVTK:
         data = np.zeros(0,dtype = np.float)
         for i in range(self.nLevel):
             self.SetupNames(i)
-
             feat = np.fromfile(self.dataDir + self.inFilename, dtype = 'double')
             
-            if(self.feature == 'velocity'): 
-                feat = feat*self.VEL.value
-                feat = np.reshape(feat,(3,-1))
-                feat = data.transpose() # Velocity ordering is weird.
-                data = np.append(data,feat.astype(float))
+            if self.feature == 'velocity':
+                data2 = np.zeros(0,dtype = np.float)
+                data2 = np.append(data2,feat.astype(float))
+                data2 = data2*self.VEL.value
+                data2 = np.reshape(data2,(3,-1))
+                data2 = data2.transpose() # Velocity ordering is weird.
+                if i > 0:
+                    data = np.concatenate((data,data2), axis = 0)
+                else:
+                    data = data2
             else:
                 data = np.append(data,feat.astype(float))
-                
         # Convert to CGS units
         if(self.feature == 'density'):
             data = data*self.DENS.value

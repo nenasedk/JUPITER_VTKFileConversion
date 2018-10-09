@@ -1,23 +1,21 @@
-JUPITER .dat to .vtk file conversion class
+#JUPITER .dat to .vtk file conversion class
 
 Evert Nasedkin, October 2018
 
 This is the class that converts the binary .dat and descriptor files
 output from JUPITER hydrodynamic simulations into .vtk format.
 
-REQUIREMENTS:
+##REQUIREMENTS:
 - python 2.7 or greater
 - numpy
 - pyvtk
 - astropy (for unit converions)
 
-USAGE:
+##USAGE:
 The class can be run from the Convert.py script
-'''
-python Convert.py
-'''
+'python Convert.py'
 
-Process:
+##Process:
 Set up of  science factors and directories based on the user input
 Read in mesh vertices from descriptor file, convert to cartesian coordinates
 Calculate cell centers
@@ -38,7 +36,6 @@ To reconstruct the grid, the coordinates are iterated in column order,
 (ie azimuthal angle is iterated the fastest, polar angle the slowest)
 It is converted to Cartesian coordinates to be written to the VTK file.
 
-Notes:
 On importing the coordinate grid it is changed from left handed to right 
 handed (azimuthal and polar angles)*-1
 

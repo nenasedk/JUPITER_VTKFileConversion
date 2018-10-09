@@ -8,15 +8,16 @@
 #
 # Additional inputs can be:
 #     - dv.SetBasePath(dir), which sets the path where data directories are stored (defaults to cwd)
-#     - Can set binary = True/False in dv.ConvertFiles()
+#     - Can set binary = True/False 
 #
 # Fixme: add feature so that all gas properties can be written to one vtk file
 
 import DATtoVTK 
-cont = True
-
-while cont:
+CONT = True
+BINARY = True # Set to false to write ASCII files
+while CONT:
     dv = DATtoVTK.DATtoVTK()
+    #dv.setBasePath('') # Uncomment this line if DATtoVTK.py is not located in the directory containing the output folders.
     while True:
         userstr = raw_input("Simulation number: ")
         try :
@@ -70,16 +71,16 @@ while cont:
 
     # Extract mesh and data, output to VTK binary file
     dv.GetCoordinates()
-    dv.ConvertFiles(False) # Can take binary = True/False (defaults to True)
+    dv.ConvertFiles(BINARY) # Can take binary = True/False (defaults to True)
     cont1 = True
     while cont1:
         userstr = raw_input("\nDo you want to convert another file? (y/n)")
         if userstr == 'y':
-            cont = True
+            CONT = True
             cont1 = False
             print "\n\n\n\n\n"
         elif userstr == 'n':
-            cont = False
+            CONT = False
             cont1 = False
         else:
             print "Please enter y or n... "

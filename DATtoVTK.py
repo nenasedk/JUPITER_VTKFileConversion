@@ -176,17 +176,21 @@ class DATtoVTK:
             self.SetupNames(i)
 
             feat = np.fromfile(self.dataDir + self.inFilename, dtype = 'double')
-            data = np.append(data,feat.astype(float))
-            #data = data.astype(float)
+            
+            if(self.feature == 'velocity'): 
+                feat = feat*self.VEL.value
+                feat = np.reshape(feat,(3,-1))
+                feat = data.transpose() # Velocity ordering is weird.
+                data = np.append(data,feat.astype(float))
+            else:
+                data = np.append(data,feat.astype(float))
+                
         # Convert to CGS units
         if(self.feature == 'density'):
             data = data*self.DENS.value
         if(self.feature == 'temperature'):
             data = data*self.TEMP.value
-        if(self.feature == 'velocity'): 
-            data= data*self.VEL.value
-            data = np.reshape(data,(3,-1))
-            data = data.transpose()
+
         print str(len(data)) + " data points for " + self.feature
         self.WriteToVTK(data, binary)
         

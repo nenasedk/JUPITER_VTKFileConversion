@@ -12,8 +12,7 @@ output from JUPITER hydrodynamic simulations into .vtk format.
 * astropy (for unit converions)
 
 ## USAGE:
-The class can be run from the Convert.py script
-''' python Convert.py '''
+The class can be run from the Convert.py script 'python Convert.py'
 
 ## Process:
 Set up of  science factors and directories based on the user input

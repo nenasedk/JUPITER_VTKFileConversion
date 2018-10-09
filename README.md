@@ -1,6 +1,8 @@
 # JUPITER .dat to .vtk file conversion class
 
-Evert Nasedkin, October 2018
+'v1.0'
+
+Evert Nasedkin, October 10 2018
 
 This is the class that converts the binary .dat and descriptor files
 output from JUPITER hydrodynamic simulations into .vtk format.

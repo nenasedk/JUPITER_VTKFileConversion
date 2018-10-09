@@ -185,7 +185,8 @@ class DATtoVTK:
             data = data*self.TEMP.value
         if(self.feature == 'velocity'): 
             data= data*self.VEL.value
-            data = np.reshape(data,(-1,3))
+            data = np.reshape(data,(3,-1))
+            data = data.transpose()
         print str(len(data)) + " data points for " + self.feature
         self.WriteToVTK(data, binary)
         

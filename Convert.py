@@ -19,7 +19,7 @@ while CONT:
     dv = DATtoVTK.DATtoVTK()
     #dv.setBasePath('') # Uncomment this line if DATtoVTK.py is not located in the directory containing the output folders.
     while True:
-        userstr = raw_input("Simulation number: ")
+        userstr = raw_input("Simulation Output number: ")
         try :
             userin = int(userstr)     
         except ValueError:
@@ -27,7 +27,7 @@ while CONT:
         else :
             break
     
-    dv.SetSimNumber(userin)
+    dv.SetOutNumber(userin)
 
 
     while True:
@@ -43,7 +43,7 @@ while CONT:
 
     err = -1
     while(err<0):
-        userstr = raw_input("\nEnter one of: density, energy, erad, opacity, potential, stheat, tau, taucell or velocity: ")
+        userstr = raw_input("\nEnter a hydro field (e.g. gasdensity or gasvelocity): ")
         err = dv.SetFeature(userstr)
     
     while True:

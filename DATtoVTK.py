@@ -50,16 +50,23 @@ class DATtoVTK:
     'Convert JUPITER .DAT files to binary VTK files for Paraview'
     def __init__(self):
         # Simulation Information
-        self.simNumber = -1 # Which sim number are we looking at
+        self.simNumber = -1 # Which sim output number are we looking at
         self.nLevel = -1 # How many mesh levels are there?
         self.feature = 'notafeat'
         self.nLevelCoords = []
-        # density, energy, erad, opacity, potential, stheat, tau, taucell, velocity
-
+        # density, temperature,energy, erad, opacity, potential, stheat, tau, taucell, velocity
+        self.featlist = ['gasdensity', 'gastemperature','gasenergy',
+                         'gaserad', 'gasopacity', 'gaspotential',
+                         'gasstheat', 'gastau', 'gastaucell',
+                         'gasvelocity','dustdensity', 'dusttemperature',
+                         'dustenergy','dusterad', 'dustopacity',
+                         'dustpotential','duststheat', 'dusttau',
+                         'dusttaucell','dustvelocity']
+        
         # Filepath information
         self.dataDir = 'notadir' # Where is the data from?
         self.dataOutPath = 'notapath' # Where do we output data
-        self.inFilename = 'notaname' # Filename constructed from feature, simNumber and nLevels
+        self.inFilename = 'notaname' # Filename constructed from feature, outNumber and nLevels
         self.outFilename = 'notaname'
         self.descriptorName = 'notadesc'
         self.BASEPATH = os.getcwd() + '/'
@@ -69,7 +76,6 @@ class DATtoVTK:
         self.rcgs = -1.
         self.mass = -1.
         self.mcgs = -1.
-
         # Science Constants
         self.TEMP = -1.
         self.DENS = -1.
@@ -80,7 +86,6 @@ class DATtoVTK:
         self.sphere = np.zeros((0,0,0),dtype=np.float64) # 3D Spherical array - edges (read in)
         self.mesh = np.zeros((0,0,0),dtype=np.float64)   # 3D cartesian array - edges
         self.cent = np.zeros((0,0,0),dtype=np.float64)   # 3D cartesian array of cell centers
-        
         self.nx = 0
         self.ny = 0
         self.nz = 0
@@ -90,22 +95,27 @@ class DATtoVTK:
     # ------------------------------------------------------------------------------------------------
         
     # Basic user Set functions
-    def SetSimNumber(self, n):
-        self.simNumber = n
+    def SetOutNumber(self, n):
+        self.outNumber = n
 
     def SetLevel(self,level):
         self.nLevel = level
 
     def SetFeature(self, feat):
-        if feat in ['density', 'energy', 'erad', 'opacity', 'potential', 'stheat', 'tau', 'taucell', 'velocity']:
+        if feat in self.featlist:
             self.feature = feat
             return 1
         else:
-            print("Not an allowed input, please enter one of density, energy, erad, opacity, potential, stheat, tau, taucell or velocity")
-            return -1
+            print("Not an recognised input, may not be implemented. Continuing...")
+            return 1
     def SetBasePath(path):
         self.BASEPATH = path
-
+    def SetInDir(path):
+        self.dataDir = path
+    def SetOutDir(path):
+        self.dataOutPath = path
+    def SetInFilename(fname):
+        self.inFilename = fname
     def SetRadius(self, rad):
         self.radius = rad*u.AU
         self.rcgs = self.radius.to(u.cm)
@@ -123,7 +133,7 @@ class DATtoVTK:
     # Directory and file Setup
     def SetupDirs( self ):
         # Error checking
-        if self.simNumber < 0:
+        if self.outNumber < 0:
             print("Please set the simulation number")
             return
         if self.feature is 'notafeat':
@@ -132,10 +142,10 @@ class DATtoVTK:
         
 
         # Create directory paths
-        self.dataDir = self.BASEPATH + "output" + str(self.simNumber).zfill(5) + "/"
-        self.dataOutPath =  self.BASEPATH + "VTK" + str(self.simNumber).zfill(5) +"/"
-        self.descriptorName = "Descriptor" + str(self.simNumber) + ".dat"
-        self.outFilename = "gas" + self.feature + str(self.simNumber) +"_" + str(self.nLevel) + ".vtk"
+        self.dataDir = self.BASEPATH + "output" + str(self.outNumber).zfill(5) + "/"
+        self.dataOutPath =  self.BASEPATH + "VTK" + str(self.outNumber).zfill(5) +"/"
+        self.descriptorName = "Descriptor" + str(self.outNumber) + ".dat"
+        self.outFilename =  self.feature + str(self.outNumber) +"_" + str(self.nLevel) + ".vtk"
 
         # Check existance
         print("Data directory is: " + self.dataDir)
@@ -150,17 +160,17 @@ class DATtoVTK:
 
 
     def SetupNames( self, level ):
-        if self.simNumber < 0:
+        if self.outNumber < 0:
             print("Please set the simulation number")
             return
         if self.feature is 'notafeat':
-            print("Please input a feature (e.g. velocity)")
+            print("Please input a feature (e.g. gasvelocity)")
             return
         if self.nLevel < 0:
             print("Please input the number of mesh refinement levels")
             return
 
-        self.inFilename = "gas" + self.feature + str(self.simNumber) +"_"+ str(level) + "_" + str(level) + ".dat"
+        self.inFilename = self.feature + str(self.outNumber) +"_"+ str(level) + "_" + str(level) + ".dat"
 
 
     # ---------------------------------------------------------------------------------------------
@@ -176,22 +186,26 @@ class DATtoVTK:
             self.SetupNames(i)
             feat = np.fromfile(self.dataDir + self.inFilename, dtype = 'double')
             
-            if self.feature == 'velocity':
+            if "velocity" in self.feature:
                 data2 = np.zeros(0,dtype = np.float)
                 data2 = np.append(data2,feat.astype(float))
                 data2 = data2*self.VEL.value
                 data2 = np.reshape(data2,(3,-1))
-                data2 = data2.transpose() # Velocity ordering is weird.
+                data3 = np.zeros((3,len(data2[0])))
+                data3[:,0] = data2[:,1]
+                data3[:,1] = data2[:,2]
+                data3[:,2] = data2[:,0]
+                data3 = data3.transpose() # Velocity ordering is weird.
                 if i > 0:
-                    data = np.concatenate((data,data2), axis = 0)
+                    data = np.concatenate((data,data3), axis = 0)
                 else:
-                    data = data2
+                    data = data3
             else:
                 data = np.append(data,feat.astype(float))
         # Convert to CGS units
-        if(self.feature == 'density'):
+        if("density" in self.feature):
             data = data*self.DENS.value
-        if(self.feature == 'temperature'):
+        if("temperature" in self.feature):
             data = data*self.TEMP.value
 
         print str(len(data)) + " data points for " + self.feature
@@ -343,10 +357,10 @@ class DATtoVTK:
 
                     nt  = nn
                                 
-                if self.feature != 'velocity':
-                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = ls,),CellData(Scalars(data,self.feature)),name ="JUPITER Sim" + str(self.simNumber) + " " + self.feature + " field")
+                if "velocity" not in self.feature:
+                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = ls,),CellData(Scalars(data,self.feature)),name ="JUPITER Sim" + str(self.outNumber) + " " + self.feature + " field")
                 else:
-                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = ls,),CellData(Vectors(data,self.feature)),name="JUPITER Sim" + str(self.simNumber) + " " + self.feature + " field")
+                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = ls,),CellData(Vectors(data,self.feature)),name="JUPITER Sim" + str(self.outNumber) + " " + self.feature + " field")
                 vtk.tofile(self.dataOutPath + self.outFilename, 'binary')
             else:
                 nn = nt= 0
@@ -375,10 +389,10 @@ class DATtoVTK:
 
                     nt  = nn
                                 
-                if self.feature != 'velocity':
-                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = ls,),CellData(Scalars(data,self.feature)),name ="JUPITER Sim" + str(self.simNumber) + " " + self.feature + " field")
+                if "velocity" not in self.feature:
+                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = ls,),CellData(Scalars(data,self.feature)),name ="JUPITER Sim" + str(self.outNumber) + " " + self.feature + " field")
                 else:
-                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = ls,),CellData(Vectors(data,self.feature)),name="JUPITER Sim" + str(self.simNumber) + " " + self.feature + " field")
+                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = ls,),CellData(Vectors(data,self.feature)),name="JUPITER Sim" + str(self.outNumber) + " " + self.feature + " field")
                 vtk.tofile(self.dataOutPath + self.outFilename)
           
         else:
@@ -387,7 +401,7 @@ class DATtoVTK:
             # -----------------------------------------------
             outfile = open(self.dataOutPath + self.outFilename, 'a+')
             if not binary:
-                if self.feature is 'velocity':
+                if "velocity" in self.feature:
                     print "Writing Vector Data"
                     outfile.write('\n%s %d\n'%('POINT_DATA', ncoords))
                     outfile.write('%s\n'%('VECTORS ' + self.feature +' float'))
@@ -397,7 +411,7 @@ class DATtoVTK:
                 # 
                 # Write out the CELL CENTERED scalars
                 #
-                if self.feature is not 'velocity':
+                if "velocity" not in self.feature:
                     print "Writing scaler " + self.feature + " data..."
                     outfile.write('\n%s %d\n'%('CELL_DATA', ((self.nx-1)*(self.ny-1)*(self.nz-1))))
                     outfile.write('%s\n'%('SCALARS ' + self.feature + ' float'))
@@ -414,7 +428,7 @@ class DATtoVTK:
                 # ---------------------------------------------------
                 print "This probably won't work. Recommend just overwriting or using ascii files."
                 outfile = open(self.dataOutPath + self.outFilename, 'a+')
-                if self.feature is 'velocity':
+                if "velocity" in self.feature:
                     print "Writing Vector Data"
                     outfile.write('\n%s %d\n'%('POINT_DATA', ncoords))
                     outfile.write('%s\n'%('VECTORS ' + self.feature +' float'))
@@ -426,7 +440,7 @@ class DATtoVTK:
                 # 
                 # Write out the CELL CENTERED scalars
                 #
-                if self.feature is not 'velocity':
+                if "velocity" not in self.feature:
                     print "Writing scaler " + self.feature + " data..."
                     outfile.close()
                     outfile = open(self.dataOutPath + self.outFilename, 'a+')

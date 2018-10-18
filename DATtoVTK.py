@@ -287,10 +287,9 @@ class DATtoVTK:
                     cur.pop()
                     th.append(cur)
                     cur = []
-
-            dsc.close()
             self.nLevelCoords.append([len(phi[i]),len(r[i]),len(th[i])])
-        self.unfiltered = self.BuildGrid(phi,r,th)
+            dsc.close()
+        self.unfiltered = self.SphereToCart(self.BuildGrid(phi,r,th))
         self.sphere,self.coordlist = self.FilterCoords(phi,r,th)
         self.mesh = self.SphereToCart(self.sphere)        
         print(str(self.sphere.shape[0]) + " Vertices in filtered grid.")
@@ -319,7 +318,6 @@ class DATtoVTK:
         newcoords = []
         tcount = 0
         fcount = 0
-
         # Check if each element in a level is in the range of the next level
         for l in range(len(x1s)-1):
             nmin = [np.min(x1s[l+1]),np.min(x2s[l+1]),np.min(x3s[l+1])]
@@ -336,9 +334,9 @@ class DATtoVTK:
                 else:
                     newcoords.append(curlev[i])
                     mlen+=1
-            self.mlen.append(mlen)
             tcount += c
             fcount += mlen
+            self.mlen.append(tcount)
         curlev,c = self.BuildOneLevel(x1s[-1],x2s[-1],x3s[-1])
         tcount += c
         fcount += c
@@ -372,9 +370,9 @@ class DATtoVTK:
     def BuildOneLevel(self, x1, x2, x3):
         coords = []
         count = 0
-        for ax in x1:
+        for az in x3:
             for ay in x2:
-                for az in x3:
+                for ax in x1:
                     coords.append([ax,ay,az])
                     count += 1
         return np.array(coords),count
@@ -404,10 +402,10 @@ class DATtoVTK:
     # Convert a list of spherical coordinates to cartisian
     # -----------------------------------------------------
     def SphereToCart(self, data):
-        newcoords = np.zeros(self.sphere.shape)
-        newcoords[:,0] = self.sphere[:,1]*self.rcgs*np.sin(self.sphere[:,2])*np.cos(self.sphere[:,0])
-        newcoords[:,1] = self.sphere[:,1]*self.rcgs*np.sin(self.sphere[:,2])*np.sin(self.sphere[:,0])
-        newcoords[:,2] = self.sphere[:,1]*self.rcgs*np.cos(self.sphere[:,2])
+        newcoords = np.zeros(data.shape)
+        newcoords[:,0] = data[:,1]*self.rcgs*np.sin(data[:,2])*np.cos(data[:,0])
+        newcoords[:,1] = data[:,1]*self.rcgs*np.sin(data[:,2])*np.sin(data[:,0])
+        newcoords[:,2] = data[:,1]*self.rcgs*np.cos(data[:,2])
         return newcoords
 
 
@@ -516,22 +514,22 @@ class DATtoVTK:
         if not append:
             if binary:        
                 if "velocity" not in self.feature:
-                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = inds,),
+                    vtk = VtkData(UnstructuredGrid(self.unfiltered,hexahedron = inds,),
                                   CellData(Scalars(data,self.feature)),
                                   name ="JUPITER Sim"+str(self.outNumber)+" "+self.feature+" field")
                 else:
-                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = inds,),
+                    vtk = VtkData(UnstructuredGrid(self.unfiltered,hexahedron = inds,),
                                   CellData(Vectors(data,self.feature)),
                                   name ="JUPITER Sim"+str(self.outNumber)+" "+self.feature+" field")
                 vtk.tofile(self.dataOutPath + self.outFilename, 'binary')
             else:
                 if "velocity" not in self.feature:
-                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = inds,),
+                    vtk = VtkData(UnstructuredGrid(self.unfiltered,hexahedron = inds,),
                                   CellData(Scalars(data,self.feature)),
                                   name ="JUPITER Sim"+str(self.outNumber)+" "+self.feature+" field")
 
                 else:
-                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = inds,),
+                    vtk = VtkData(UnstructuredGrid(self.unfiltered,hexahedron = inds,),
                                   CellData(Vectors(data,self.feature)),
                                   name ="JUPITER Sim"+str(self.outNumber)+" "+self.feature+" field")
 

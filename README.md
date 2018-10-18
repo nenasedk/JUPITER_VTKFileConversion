@@ -19,8 +19,10 @@ The class can be run from the Convert.py script
 
 Alternatively
 ```python script_convert.py [first] [grid_level] [radius] [mass] [field list]```
+
 or with full options:
 ```python script_convert.py [first] [grid level] [radius] [mass] -l [last] -b [binary/ascii] -d [dir] [field list]```
+
 See script_convert.py for more details.
 
 ## Process:

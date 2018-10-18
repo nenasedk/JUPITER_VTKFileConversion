@@ -99,16 +99,16 @@ class DATtoVTK:
         self.VEL = -1.
         
         # Grid Information
-        self.sphere =[]# np.empty(0) # 3D Spherical array - edges (read in)
+        self.sphere =[]# np.empty(0) # 3D Spherical array - edges (read in and filter)
         self.mesh = np.zeros((0,0,3),dtype=np.float64)   # 3D cartesian array - edges
-        self.cent = np.zeros((0,0,3),dtype=np.float64)   # 3D cartesian array of cell centers
-        self.nx = 0
-        self.ny = 0
-        self.nz = 0
-        self.ncell = 0
-        self.mlen = [0]
-        self.coordlist = np.zeros(0)
-        self.cellist = []
+        self.unfiltered = self.mesh = np.zeros((0,0,3),dtype=np.float64) # Unfiltered spherical coords
+        self.ncell = 0 # How many cells are there (filtered)
+        self.mlen = [0] # How many coordinates in the previous mesh level (unfiltered)  
+        self.coordlist = np.zeros(0) # Which coordinates were filtered out
+        self.cellist = [] # Which cells were filtered out
+        self.mins = [] # Min boundaries of a each mesh level
+        self.maxs = [] # Max boundaries of a each mesh level
+
     # ------------------------------------------------------------------------------------------------
         
     # Basic user Set functions
@@ -210,11 +210,11 @@ class DATtoVTK:
                 print data2
                 data2 = np.reshape(data2,(3,-1))
                 data3 = np.column_stack((data2[1], data2[0], data2[1]))
-                #data3[:,0] = data2[2]*self.rcgs*np.sin(data2[0])*np.cos(data2[1])
-                #data3[:,1] = data2[2]*self.rcgs*np.sin(data2[0])*np.sin(data2[1])
-                #data3[:,2] = data2[2]*self.rcgs*np.cos(data2[0])
+                data3[:,0] = data2[2]*self.rcgs*np.sin(data2[0])*np.cos(data2[1])
+                data3[:,1] = data2[2]*self.rcgs*np.sin(data2[0])*np.sin(data2[1])
+                data3[:,2] = data2[2]*self.rcgs*np.cos(data2[0])
                 #print data3
-                #data3 = data3.transpose() # Velocity ordering is weird.
+                data3 = data3.transpose() # Velocity ordering is weird.
                 print data3
                 data3 = data3*self.VEL#.value
                 print data3
@@ -226,23 +226,21 @@ class DATtoVTK:
             else:
                 # Read in binary doubles into a 1D array
                 feat = np.fromfile(self.dataDir + self.inFilename, dtype = 'double')
-                data.append(feat)
+                data.extend(feat)
 
         # Compute all of the indices of cell vertices
         # Have to do this here to find out which cells
         # are overlapping, and should not be included
         inds = self.ComputeIndices()
         # Delete overlapping data points
-        for c in self.cellist:
-            data = np.delete(data,c)
-        print data.size
+        data = np.delete(data,self.cellist)
         # Convert to CGS units
         if("density" in self.feature):
             data = [x*self.DENS for x in data]#.value
         if("temperature" in self.feature):
             data = [x*self.TEMP for x in data]#.value
         print str(self.ListLen(data)) + " data points for " + self.feature
-        self.WriteToVTK(data, binary)
+        self.WriteToVTK(data, inds, binary)
 
 
     # -------------------------------------------------------
@@ -292,16 +290,10 @@ class DATtoVTK:
 
             dsc.close()
             self.nLevelCoords.append([len(phi[i]),len(r[i]),len(th[i])])
-            
+        self.unfiltered = self.BuildGrid(phi,r,th)
         self.sphere,self.coordlist = self.FilterCoords(phi,r,th)
-        self.mesh = self.SphereToCart(self.sphere)
-        for n in range(self.nLevel):
-            self.nx += self.nLevelCoords[n][0]
-            self.ny += self.nLevelCoords[n][1]
-            self.nz += self.nLevelCoords[n][2]
-            self.ncell += ((self.nLevelCoords[n][0]-1)*(self.nLevelCoords[n][1]-1)*(self.nLevelCoords[n][2]-1))
-        print(str(self.mesh.size) + " Vertices in grid.")
-        print str(self.ncell) + " Cells in grid."
+        self.mesh = self.SphereToCart(self.sphere)        
+        print(str(self.sphere.shape[0]) + " Vertices in filtered grid.")
 
 
     # -------------------------------------------------------------------------
@@ -325,28 +317,35 @@ class DATtoVTK:
             sys.exit(1)
         coordlist = []
         newcoords = []
-        count = 0
+        tcount = 0
+        fcount = 0
 
         # Check if each element in a level is in the range of the next level
         for l in range(len(x1s)-1):
             nmin = [np.min(x1s[l+1]),np.min(x2s[l+1]),np.min(x3s[l+1])]
             nmax = [np.max(x1s[l+1]),np.max(x2s[l+1]),np.max(x3s[l+1])]
+            self.mins.append(nmin)
+            self.maxs.append(nmax)
             curlev,c = self.BuildOneLevel(x1s[l],x2s[l],x3s[l])
-            print 
+            mlen = 0
             for i in range(len(curlev)):
                 # If yes, note the coordinate number (for data filtering)
-                if not (self.InRange(nmin,nmax,curlev[i])):
-                    coordlist.append(count + i)
+                if (self.InRange(nmin,nmax,curlev[i])):
+                    coordlist.append(tcount + i)
                 # If not, that coordinate is not included.
                 else:
                     newcoords.append(curlev[i])
-            
+                    mlen+=1
+            self.mlen.append(mlen)
+            tcount += c
+            fcount += mlen
         curlev,c = self.BuildOneLevel(x1s[-1],x2s[-1],x3s[-1])
-        count += c
+        tcount += c
+        fcount += c
         for i in range(len(curlev)):
             newcoords.append(curlev[i])
         # Return the coordinate array, and the coordinates to delete in reverse order (delete from end)
-        return np.array(newcoords),np.sort(np.array(coordlist))[::-1]
+        return np.array(newcoords),np.sort(np.array(coordlist))
 
     # -------------------------------------------------------
     # In Range
@@ -398,7 +397,6 @@ class DATtoVTK:
             tg,c = self.BuildOneLevel(x1s[i], x2s[i], x3s[i])
             grid.extend(tg)
             lcount.append(c)
-            print len(grid)
         return np.array(grid)
         
     # -----------------------------------------------------
@@ -447,6 +445,22 @@ class DATtoVTK:
     # This is then formatted into a list to be output
     # to the VTK file.
     def ComputeIndices(self):
+        # ----------------------------------------------------------------------------------------
+        # Write out the indices of the cell interface mesh that define a
+        # hexahedron (VTK cell type #12)
+        # 
+        # The indexing of a hexahedron is as follows
+        #
+        #                  7________6
+        #                 /|      / |               
+        #                / |     /  |               
+        #               4_------5   |         z  th ^   ^ r y
+        #               |  3____|___2               |  /
+        #               | /     |  /                | /
+        #               |/      | /                 |/
+        #               0-------1                   0----->phi x
+        #
+        # ---------------------------------------------------------------------------------------
         nn = 0
         ls = []
         for n in range(self.nLevel): # mesh refinement levels are written out sequentially
@@ -469,9 +483,24 @@ class DATtoVTK:
                         id4 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*iy     + ix
                         id7 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*(iy+1) + ix
                         line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
-                        if set([id0,id1,id2,id3,id4,id5,id6,id7]).issubset(self.coordlist):
+                        if n < (self.nLevel-1):
+                            cell = np.array([(self.unfiltered[id0][0] + self.unfiltered[id1][0])/2,
+                                             (self.unfiltered[id1][1] + self.unfiltered[id2][1])/2,
+                                             (self.unfiltered[id1][2] + self.unfiltered[id5][2])/2])
+                            if self.InRange(self.mins[n],self.maxs[n],cell):
                                 self.cellist.append(nn)
-                        else: ls.append(line)
+                            else:
+                                ls.append(line)
+                                self.ncell +=1
+                            
+                        else:
+                            ls.append(line)
+                            self.ncell +=1
+                                
+                        #if set([id0,id1,id2,id3,id4,id5,id6,id7]).issubset(self.coordlist):
+                        #if all(elem in self.coordlist for ind in [id0,id1,id2,id3,id4,id5,id6,id7] ):
+                        #       self.cellist.append(nn)
+        print str(self.ncell) + " Cells in the mesh."
         return ls
             
     #                                  
@@ -482,44 +511,27 @@ class DATtoVTK:
         # Write out based on RadMC3D WriteVTK()
         # and makes use of pyvtk
         #
-        # ----------------------------------------------------------------------------------------
-        # Write out the indices of the cell interface mesh that define a
-        # hexahedron (VTK cell type #12)
-        # 
-        # The indexing of a hexahedron is as follows
-        #
-        #                  7________6
-        #                 /|      / |               
-        #                / |     /  |               
-        #               4_------5   |         z  th ^   ^ r y
-        #               |  3____|___2               |  /
-        #               | /     |  /                | /
-        #               |/      | /                 |/
-        #               0-------1                   0----->phi x
-        #
-        # ---------------------------------------------------------------------------------------
         ncoords = self.mesh.shape[0]
         ncells = self.ncell
         if not append:
-            appendFilter = vtk.vtkAppendFilter()
             if binary:        
                 if "velocity" not in self.feature:
-                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = ls,),
+                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = inds,),
                                   CellData(Scalars(data,self.feature)),
                                   name ="JUPITER Sim"+str(self.outNumber)+" "+self.feature+" field")
                 else:
-                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = ls,),
+                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = inds,),
                                   CellData(Vectors(data,self.feature)),
                                   name ="JUPITER Sim"+str(self.outNumber)+" "+self.feature+" field")
                 vtk.tofile(self.dataOutPath + self.outFilename, 'binary')
             else:
                 if "velocity" not in self.feature:
-                    vtk = VtkData(UnstructuredGrid(self.mesh[n],hexahedron = inds[n],),
+                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = inds,),
                                   CellData(Scalars(data,self.feature)),
                                   name ="JUPITER Sim"+str(self.outNumber)+" "+self.feature+" field")
 
                 else:
-                    vtk = VtkData(UnstructuredGrid(self.mesh[n],hexahedron = inds[n],),
+                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = inds,),
                                   CellData(Vectors(data,self.feature)),
                                   name ="JUPITER Sim"+str(self.outNumber)+" "+self.feature+" field")
 
@@ -533,9 +545,9 @@ class DATtoVTK:
             if not binary:
                 if "velocity" in self.feature:
                     print "Writing Vector Data"
-                    outfile.write('\n%s %d\n'%('POINT_DATA', ncoords))
+                    outfile.write('\n%s %d\n'%('POINT_DATA', self.ncell))
                     outfile.write('%s\n'%('VECTORS ' + self.feature +' double'))
-                    for i in range(0,ncoords):
+                    for i in range(self.ncell):
                         outfile.write('%.9e %.9e %.9e\n'%(data[i][0], data[i][1], data[0][2]))
 
                 # 
@@ -543,11 +555,11 @@ class DATtoVTK:
                 #
                 if "velocity" not in self.feature:
                     print "Writing scaler " + self.feature + " data..."
-                    outfile.write('\n%s %d\n'%('CELL_DATA', ((self.nx-1)*(self.ny-1)*(self.nz-1))))
+                    outfile.write('\n%s %d\n'%('CELL_DATA', self.ncell))
                     outfile.write('%s\n'%('SCALARS ' + self.feature + ' double'))
                     outfile.write('%s\n'%'LOOKUP_TABLE default')                   
-                    for i in range(ncells):
-                        self.printProgressBar(i,ncells)
+                    for i in range(self.ncell):
+                        self.printProgressBar(i,self.ncell)
                         outfile.write('%.9e\n'%data[i])
 
                 outfile.close()
@@ -560,11 +572,11 @@ class DATtoVTK:
                 outfile = open(self.dataOutPath + self.outFilename, 'a+')
                 if "velocity" in self.feature:
                     print "Writing Vector Data"
-                    outfile.write('\n%s %d\n'%('POINT_DATA', ncoords))
+                    outfile.write('\n%s %d\n'%('CELL_DATA', self.ncell))
                     outfile.write('%s\n'%('VECTORS ' + self.feature +' double'))
                     outfile.close()
                     outfile = open(self.dataOutPath + self.outFilename, 'ab+')
-                    for i in range(ncoords):
+                    for i in range(self.ncell):
                         data[i].tofile(outfile)
 
                 # 
@@ -574,13 +586,13 @@ class DATtoVTK:
                     print "Writing scaler " + self.feature + " data..."
                     outfile.close()
                     outfile = open(self.dataOutPath + self.outFilename, 'a+')
-                    outfile.write('\n%s %d\n'%('CELL_DATA', ncells))
+                    outfile.write('\n%s %d\n'%('CELL_DATA', self.ncell))
                     outfile.write('%s\n'%('SCALARS ' + self.feature + ' double'))
                     outfile.write('%s\n'%'LOOKUP_TABLE default')
                     outfile.close()
                     outfile = open(self.dataOutPath + self.outFilename, 'ab+')
                     for i in range(ncells):
-                        self.printProgressBar(int(i),ncells)
+                        self.printProgressBar(int(i),self.ncell)
                         data[i].tofile(outfile)
 
                 # Close and exit

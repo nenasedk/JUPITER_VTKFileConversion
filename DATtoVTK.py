@@ -497,13 +497,13 @@ class DATtoVTK:
         ls = []
         
         for n in range(self.nLevel): # mesh refinement levels are written out sequentially
-
+            k1 = k3 = self.nLevelCoords[n][0]
+            k2 = k4 = self.nLevelCoords[n][1]
             for iz in range(self.nLevelCoords[n][2]-1):
                 for iy in range(self.nLevelCoords[n][1]-1):
                     for ix in range(self.nLevelCoords[n][0]-1):   # Calculate the index of each of the vertices of a given cell, and write to file.
                         nn +=1
-                        k1 = k3 = self.nLevelCoords[n][0]
-                        k2 = k4 = self.nLevelCoords[n][1]
+                        # Not sure if ks should be reset each step or not. probably shouldn't be.
                         id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,iy,iz,k1,k2,k3,k4)
 
                         # Check if cell is within next mesh level
@@ -539,13 +539,16 @@ class DATtoVTK:
                                 # id5 = self.mlen[n] + k2*(iz+1) + k3*iy     + ((ix+1) % (self.nLevelCoords[n][0]-1))
                                 if b0x:
                                     k1 = self.nLevelCoords[n][0] - self.nLevelCoords[n+1][0]/2
+                                else: k1 = self.nLevelCoords[n][0]
                                 if b6x:
                                     k3 = self.nLevelCoords[n][0] - self.nLevelCoords[n+1][0]/2
+                                else: k3 = self.nLevelCoords[n][0]
                                 if b0y:
                                     k2 = self.nLevelCoords[n][1] - self.nLevelCoords[n+1][1]/2
+                                else:  k2 = self.nLevelCoords[n][1]
                                 if b6y:
                                     k4 = self.nLevelCoords[n][1] - self.nLevelCoords[n+1][1]/2
-                                    
+                                else: k4 = self.nLevelCoords[n][1]
                                 id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,iy,iz,k1,k2,k3,k4)
                         
                                 line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])

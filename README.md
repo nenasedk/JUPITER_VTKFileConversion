@@ -1,6 +1,6 @@
 # JUPITER .dat to .vtk file conversion class
 
-`v1.0`
+`v1.1`
 
 Evert Nasedkin, October 10 2018
 
@@ -15,7 +15,18 @@ output from JUPITER hydrodynamic simulations into .vtk format.
 
 ## USAGE:
 The class can be run from the Convert.py script 
+
 ```python Convert.py```
+
+Alternatively
+
+```python script_convert.py [first] [grid_level] [radius] [mass] [field list]```
+
+or with full options:
+
+```python script_convert.py [first] [grid level] [radius] [mass] -l [last] -b [binary/ascii] -d [dir] [field list]```
+
+See script_convert.py for more details.
 
 ## Process:
 Set up of  science factors and directories based on the user input
@@ -41,3 +52,11 @@ It is converted to Cartesian coordinates to be written to the VTK file.
 On importing the coordinate grid it is changed from left handed to right 
 handed (azimuthal and polar angles)*-1
 
+## Known Issues
+AMR processing still doesn't work - multiple data points stored for the same 
+physical location due to overlapping levels of mesh refinement
+
+## Changelog
+Added filtering of vertices and cells to remove overlapping regions (not working properly)
+Refactored code to be more modular (ie SphereToCart was added) and remove duplicate code
+Improved scriptability by adding extra user facing functions, with a template python script

@@ -336,7 +336,7 @@ class DATtoVTK:
                     mlen+=1
             tcount += c
             fcount += mlen
-            self.mlen.append(tcount)
+            self.mlen.append(fcount) # This line is important - fcount if using filtered mesh, tcount else
         curlev,c = self.BuildOneLevel(x1s[-1],x2s[-1],x3s[-1])
         tcount += c
         fcount += c
@@ -362,6 +362,16 @@ class DATtoVTK:
             z = True
         return x and y and z
 
+    def InPlane(self, minpair, maxpair, pair):
+        # Assume thrid component is false
+        # i.e., we're not in the forbidden region, bu
+        # a line traced along an axis will intersect it.
+        x = y = False
+        if(pair[0] >= minpair[0] and pair[0] <= maxpair[0]):
+            x = True
+        if(pair[1] >= minpair[1] and pair[1] <= maxpair[1]):
+            y = True
+        return x and y
     # -------------------------------------------------------
     # BuildOneLevel
     # This function takes in 3 axis and builds an array of
@@ -436,12 +446,36 @@ class DATtoVTK:
                 print "Nothing written to file!"
                 return
 
+    # -----------------------------------------------
+    # ComputeCell
+    # Compute the indices of the vertices of a given
+    # cell in the mesh.
+    # k1-4 allow for holes in the mesh when counting
+    # indices
+    # -----------------------------------------------
+    def ComputeCell(self,n,ix,iy,iz,k1,k2,k3,k4):
+        id0 = self.mlen[n] + k1*iz     + k2*iy     + ix
+        if(n == 0): # Only the base mesh level returns to the original location
+            id1 = self.mlen[n] + k1*k2*iz     + k1*iy     + ((ix+1) % (-1))
+            id2 = self.mlen[n] + k1*k2*iz     + k3*(iy+1) + ((ix+1) % (self.nLevelCoords[n][0]-1))
+            id5 = self.mlen[n] + k3*k4*(iz+1) + k1*iy     + ((ix+1) % (self.nLevelCoords[n][0]-1))
+            id6 = self.mlen[n] + k3*k4*(iz+1) + k3*(iy+1) + ((ix+1) % (self.nLevelCoords[n][0]-1))
+        else:
+            id1 = self.mlen[n] + k1*k2*iz     + k1*iy     + (ix+1)
+            id2 = self.mlen[n] + k1*k2*iz     + k3*(iy+1) + (ix+1)
+            id5 = self.mlen[n] + k3*k4*(iz+1) + k1*iy     + (ix+1)
+            id6 = self.mlen[n] + k3*k4*(iz+1) + k3*(iy+1) + (ix+1)
+        id3 = self.mlen[n] + k1*k2*iz     + k3*(iy+1) + ix 
+        id4 = self.mlen[n] + k3*k4*(iz+1) + k1*iy     + ix
+        id7 = self.mlen[n] + k3*k4*(iz+1) + k3*(iy+1) + ix
+        return id0,id1,id2,id3,id4,id5,id6,id7
     # ---------------------------------------------------
     # ComputeIndices
     # For each cell in the mesh, this function computes
     # the index of the coordinate for each vertex
     # This is then formatted into a list to be output
     # to the VTK file.
+    # ----------------------------------------------------
     def ComputeIndices(self):
         # ----------------------------------------------------------------------------------------
         # Write out the indices of the cell interface mesh that define a
@@ -461,26 +495,18 @@ class DATtoVTK:
         # ---------------------------------------------------------------------------------------
         nn = 0
         ls = []
+        
         for n in range(self.nLevel): # mesh refinement levels are written out sequentially
+
             for iz in range(self.nLevelCoords[n][2]-1):
                 for iy in range(self.nLevelCoords[n][1]-1):
                     for ix in range(self.nLevelCoords[n][0]-1):   # Calculate the index of each of the vertices of a given cell, and write to file.
                         nn +=1
-                        id0 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*iy     + ix
-                        if(n == 0): # Only the base mesh level returns to the original location
-                            id1 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*iy     + ((ix+1) % (self.nLevelCoords[n][0]-1))
-                            id2 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*(iy+1) + ((ix+1) % (self.nLevelCoords[n][0]-1))
-                            id5 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*iy     + ((ix+1) % (self.nLevelCoords[n][0]-1))
-                            id6 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*(iy+1) + ((ix+1) % (self.nLevelCoords[n][0]-1))
-                        else:
-                            id1 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*iy     + (ix+1)
-                            id2 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*(iy+1) + (ix+1)
-                            id5 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*iy     + (ix+1)
-                            id6 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*(iy+1) + (ix+1)
-                        id3 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*(iy+1) + ix 
-                        id4 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*iy     + ix
-                        id7 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*(iy+1) + ix
-                        line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
+                        k1 = k3 = self.nLevelCoords[n][0]
+                        k2 = k4 = self.nLevelCoords[n][1]
+                        id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,iy,iz,k1,k2,k3,k4)
+
+                        # Check if cell is within next mesh level
                         if n < (self.nLevel-1):
                             cell = np.array([(self.unfiltered[id0][0] + self.unfiltered[id1][0])/2,
                                              (self.unfiltered[id1][1] + self.unfiltered[id2][1])/2,
@@ -488,16 +514,48 @@ class DATtoVTK:
                             if self.InRange(self.mins[n],self.maxs[n],cell):
                                 self.cellist.append(nn)
                             else:
+                                # Need to adjust index counting to allow for a hole in the mesh
+                                # This will change the multipication
+                                b0x = self.InPlane([self.mins[n][1],self.mins[n][2]],
+                                                   [self.maxs[n][1],self.maxs[n][2]],
+                                                   [self.sphere[id0][1],self.sphere[id0][2]])
+                                b0y = self.InPlane([self.mins[n][0],self.mins[n][2]],
+                                                   [self.maxs[n][0],self.maxs[n][2]],
+                                                   [self.sphere[id0][0],self.sphere[id0][2]])
+                                b0z = self.InPlane([self.mins[n][0],self.mins[n][1]],
+                                                   [self.maxs[n][0],self.maxs[n][1]],
+                                                   [self.sphere[id0][0],self.sphere[id0][1]])
+                                b6x = self.InPlane([self.mins[n][1],self.mins[n][2]],
+                                                   [self.maxs[n][1],self.maxs[n][2]],
+                                                   [self.sphere[id6][1],self.sphere[id0][2]])
+                                b6y = self.InPlane([self.mins[n][0],self.mins[n][2]],
+                                                   [self.maxs[n][0],self.maxs[n][2]],
+                                                   [self.sphere[id6][0],self.sphere[id0][2]])
+                                b6y = self.InPlane([self.mins[n][0],self.mins[n][1]],
+                                                   [self.maxs[n][0],self.maxs[n][1]],
+                                                   [self.sphere[id6][0],self.sphere[id0][1]])
+
+                                # id2 = self.mlen[n] + k1*iz     + k4*(iy+1) + ((ix+1) % (self.nLevelCoords[n][0]-1))
+                                # id5 = self.mlen[n] + k2*(iz+1) + k3*iy     + ((ix+1) % (self.nLevelCoords[n][0]-1))
+                                if b0x:
+                                    k1 = self.nLevelCoords[n][0] - self.nLevelCoords[n+1][0]/2
+                                if b6x:
+                                    k3 = self.nLevelCoords[n][0] - self.nLevelCoords[n+1][0]/2
+                                if b0y:
+                                    k2 = self.nLevelCoords[n][1] - self.nLevelCoords[n+1][1]/2
+                                if b6y:
+                                    k4 = self.nLevelCoords[n][1] - self.nLevelCoords[n+1][1]/2
+                                    
+                                id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,iy,iz,k1,k2,k3,k4)
+                        
+                                line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
                                 ls.append(line)
                                 self.ncell +=1
-                            
+                        # All of the finest mesh level gets written out
                         else:
+                            line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
                             ls.append(line)
                             self.ncell +=1
-                                
-                        #if set([id0,id1,id2,id3,id4,id5,id6,id7]).issubset(self.coordlist):
-                        #if all(elem in self.coordlist for ind in [id0,id1,id2,id3,id4,id5,id6,id7] ):
-                        #       self.cellist.append(nn)
         print str(self.ncell) + " Cells in the mesh."
         return ls
             
@@ -514,22 +572,22 @@ class DATtoVTK:
         if not append:
             if binary:        
                 if "velocity" not in self.feature:
-                    vtk = VtkData(UnstructuredGrid(self.unfiltered,hexahedron = inds,),
+                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = inds,), 
                                   CellData(Scalars(data,self.feature)),
                                   name ="JUPITER Sim"+str(self.outNumber)+" "+self.feature+" field")
                 else:
-                    vtk = VtkData(UnstructuredGrid(self.unfiltered,hexahedron = inds,),
+                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = inds,),
                                   CellData(Vectors(data,self.feature)),
                                   name ="JUPITER Sim"+str(self.outNumber)+" "+self.feature+" field")
                 vtk.tofile(self.dataOutPath + self.outFilename, 'binary')
             else:
                 if "velocity" not in self.feature:
-                    vtk = VtkData(UnstructuredGrid(self.unfiltered,hexahedron = inds,),
+                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = inds,),
                                   CellData(Scalars(data,self.feature)),
                                   name ="JUPITER Sim"+str(self.outNumber)+" "+self.feature+" field")
 
                 else:
-                    vtk = VtkData(UnstructuredGrid(self.unfiltered,hexahedron = inds,),
+                    vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = inds,),
                                   CellData(Vectors(data,self.feature)),
                                   name ="JUPITER Sim"+str(self.outNumber)+" "+self.feature+" field")
 

@@ -460,7 +460,7 @@ class DATtoVTK:
     # k1-4 allow for holes in the mesh when counting
     # indices
     # -----------------------------------------------
-    def ComputeCell(self,n,ix,iy,iz,k1,k2):
+    def ComputeCell(self,n,ix,iy,iz,k1,k2,k3,k4,k5):
         # ----------------------------------------------------------------------------------------
         # Write out the indices of the cell interface mesh that define a
         # hexahedron (VTK cell type #12)
@@ -477,26 +477,28 @@ class DATtoVTK:
         #               0-------1                   0----->phi x
         #
         #
-        # k1: Length of x array for the left plane
-        # k2: Length of y array for the front plane
-        # k3: Length of x array for the right plane
-        # k4: Length of y array for the rear plane
+        # k1: Total number of points in the current mesh refinement level up to the current plane (z increment)
+        # k2: Number of points in the current r,phi plane
+        # k3: Number of complete azimuthal axes so far in the current r,phi plane
+        # k4: Number of points in an incomplete azimuthal axis.
+        # k5: Number of x points to the iy+1 coordinate
         # ---------------------------------------------------------------------------------------
-        id0 = self.mlen[n] + k2*iz     + k1*iy     + ix
+        id0 = self.mlen[n] + k2*iz      + k3*self.nLevelCoords[n][0] + (iy-k3)*k4      + ix
         if(n == 0): # Only the base mesh level returns to the original location
-            id1 = self.mlen[n] + k2*iz     + k1*iy     + ((ix+1) % (k1-1))
-            id2 = self.mlen[n] + k2*iz     + k1*(iy+1) + ((ix+1) % (k1-1))
-            id5 = self.mlen[n] + k2*(iz+1) + k1*iy     + ((ix+1) % (k1-1))
-            id6 = self.mlen[n] + k2*(iz+1) + k1*(iy+1) + ((ix+1) % (k1-1))
+            id1 = self.mlen[n] + k1     + k3*self.nLevelCoords[n][0] + (iy-k3)*k4      + ((ix+1) % (k5-1))
+            id2 = self.mlen[n] + k1     + k3*self.nLevelCoords[n][0] + (iy-k3)*k4 + k5 + ((ix+1) % (k5-1))
+            id5 = self.mlen[n] + k1+k2  + k3*self.nLevelCoords[n][0] + (iy-k3)*k4      + ((ix+1) % (k5-1))
+            id6 = self.mlen[n] + k1+k2  + k3*self.nLevelCoords[n][0] + (iy-k3)*k4 + k5 + ((ix+1) % (k5-1))
         else:
-            id1 = self.mlen[n] + k2*iz     + k1*iy     + (ix+1)
-            id2 = self.mlen[n] + k2*iz     + k1*(iy+1) + (ix+1)
-            id5 = self.mlen[n] + k2*(iz+1) + k1*iy     + (ix+1)
-            id6 = self.mlen[n] + k2*(iz+1) + k1*(iy+1) + (ix+1)
-        id3 = self.mlen[n] + k2*iz     + k1*(iy+1) + ix 
-        id4 = self.mlen[n] + k2*(iz+1) + k1*iy     + ix
-        id7 = self.mlen[n] + k2*(iz+1) + k1*(iy+1) + ix
+            id1 = self.mlen[n] + k1     + k3*self.nLevelCoords[n][0] + (iy-k3)*k4      + (ix+1)
+            id2 = self.mlen[n] + k1     + k3*self.nLevelCoords[n][0] + (iy-k3)*k4 + k5 + (ix+1)
+            id5 = self.mlen[n] + k1+k2  + k3*self.nLevelCoords[n][0] + (iy-k3)*k4      + (ix+1)
+            id6 = self.mlen[n] + k1+k2  + k3*self.nLevelCoords[n][0] + (iy-k3)*k4 + k5 + (ix+1)
+        id3 = self.mlen[n] + k1    + k3*self.nLevelCoords[n][0]      + (iy-k3)*k4 + k5 + ix
+        id4 = self.mlen[n] + k1+k2 + k3*self.nLevelCoords[n][0]      + (iy-k3)*k4      + ix
+        id7 = self.mlen[n] + k1+k2 + k3*self.nLevelCoords[n][0]      + (iy-k3)*k4 + k5 + ix
         return id0,id1,id2,id3,id4,id5,id6,id7
+    
     # ---------------------------------------------------
     # ComputeIndices
     # For each cell in the mesh, this function computes
@@ -505,101 +507,85 @@ class DATtoVTK:
     # to the VTK file.
     # ----------------------------------------------------
     def ComputeIndices(self):
-
-        nn = 0
+        nn =0
         ls = []
-        
+        id0 = id1 = id2 = id3 = id4 = id5 = id6 = id7 = 0
         for n in range(self.nLevel): # mesh refinement levels are written out sequentially
-            k1 = self.nLevelCoords[n][0]
-            k2 = self.nLevelCoords[n][0]*self.nLevelCoords[n][1]
-            b0x = b0y = b6x = b6y = False
+            thisxy = nextxy = total= 0
+            thisus = totalus = nextus = 0
+            # Setup mesh step sizes
             if (n < self.nLevel -1):
-                hx = (self.nLevelCoords[n][0]-1)/(self.maxbound[n][0] - self.minbound[n][0])
-                hy = (self.nLevelCoords[n][1]-1)/(self.maxbound[n][1] - self.minbound[n][1])
-                dtx = self.maxs[n][0] - self.mins[n][0]
-                dty = self.maxs[n][1] - self.mins[n][1]
+                hx = float((self.nLevelCoords[n][0]-1)/(self.maxbound[n][0] - self.minbound[n][0]))
+                dtx = float(self.maxs[n][0] - self.mins[n][0])
+                hy = float((self.nLevelCoords[n][1]-1)/(self.maxbound[n][1] - self.minbound[n][1]))
+                dty = float(self.maxs[n][1] - self.mins[n][1])
+                shortx = (self.nLevelCoords[n][0]-1)-(hx*dtx)
+            # Calculate the index of each of the vertices   
             for iz in range(self.nLevelCoords[n][2]-1):
-                check = True
+                # Get number of points on this plane
+                xycount = 0
+                nf = 0
+                totalus+=nextus
+                thisus = nextus
+                nextus = int((self.nLevelCoords[n][0]-1)*(self.nLevelCoords[n][1]-1))
+                if n < (self.nLevel-1):
+                    print self.mins[n]
+                    print self.sphere[id0+1]
+                    print self.maxs[n]
+                    if (self.sphere[id0][2] > self.mins[n][2] and self.sphere[id0][2] < self.maxs[n][2]):
+                        print int((hx*dtx-1.)*(hy*dty-1.))+1
+                        nextxy = int((self.nLevelCoords[n][0]-1)*(self.nLevelCoords[n][1]-1) - int((hx*dtx-1.)*(hy*dty-1.))+1)                                              
+                    else:
+                        nextxy = int((self.nLevelCoords[n][0]-1)*(self.nLevelCoords[n][1]-1))
+                    print iz,nn,id0,k2,(self.nLevelCoords[n][0]-1)*(self.nLevelCoords[n][1]-1)
                 for iy in range(self.nLevelCoords[n][1]-1):
-                    for ix in range(self.nLevelCoords[n][0]-1):   # Calculate the index of each of the vertices of a given cell, and write to file.
-                        nn +=1
+                    for ix in range(self.nLevelCoords[n][0]-1):
                         # If reached edge of next level on prev step, adjust counting
-                        if not b6x:
-                            k1 = k3 = self.nLevelCoords[n][0]
-                        #if not b6y:
-                        #    k2 = k4 = self.nLevelCoords[n][1]
-
-                        id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,iy,iz,k1,k2)
-
                         if n < (self.nLevel-1):
-                            if check:
-                                check = False
-                                k2 = 0
-                                for ay in range(self.nLevelCoords[n][1] ):
-                                    for ax in range(self.nLevelCoords[n][0]):
-                                        cell = np.array([self.sphere[id0][0],
-                                                         self.sphere[id0][1],
-                                                         self.sphere[id0][2]])
-                                        if self.InRange(self.mins[n],self.maxs[n],cell):
-                                            continue
-                                        else:
-                                            k2 += 1
-                                print k2
-                            id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,iy,iz,k1,k2)
-
+                            id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,iy,iz,totalus,nextus,iy,0,self.nLevelCoords[n][0]-1)                        
                             # Check if cell is within next mesh level
-                            cell = np.array([(self.sphere[id0][0] + self.sphere[id6][0])/2,
-                                             (self.sphere[id0][1] + self.sphere[id6][1])/2,
-                                             (self.sphere[id0][2] + self.sphere[id6][2])/2])
+                            cell = np.array([(self.unstructured[id0][0] + self.unstructured[id6][0])/2,
+                                             (self.unstructured[id0][1] + self.unstructured[id6][1])/2,
+                                             (self.unstructured[id0][2] + self.unstructured[id6][2])/2])
+                            # Add to list of data points to remove
                             if self.InRange(self.mins[n],self.maxs[n],cell):
                                 self.cellist.append(nn)
+                                continue
                             else:
                                 # Need to adjust index counting to allow for a hole in the mesh
-                                # This will change the multipication
+                                # b0x is True if the hole is along a radial line from the current coordinate
+                                xycount+=1
+                                id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,iy,iz,totalxy,nextxy,nf,shortx,nextx)
                                 b0x = self.InPlane([self.mins[n][1],self.mins[n][2]],
                                                    [self.maxs[n][1],self.maxs[n][2]],
                                                    [self.sphere[id0][1],self.sphere[id0][2]])
-                                b0y = self.InPlane([self.mins[n][0],self.mins[n][2]],
-                                                   [self.maxs[n][0],self.maxs[n][2]],
-                                                   [self.sphere[id0][0],self.sphere[id0][2]])
-                                #b0z = self.InPlane([self.mins[n][0],self.mins[n][1]],
-                                #                   [self.maxs[n][0],self.maxs[n][1]],
-                                #                   [self.sphere[id0][0],self.sphere[id0][1]])
-                                b6x = self.InPlane([self.mins[n][1],self.mins[n][2]],
+                                b2x = self.InPlane([self.mins[n][1],self.mins[n][2]],
                                                    [self.maxs[n][1],self.maxs[n][2]],
-                                                   [self.sphere[id6][1],self.sphere[id6][2]])
-                                b6y = self.InPlane([self.mins[n][0],self.mins[n][2]],
-                                                   [self.maxs[n][0],self.maxs[n][2]],
-                                                   [self.sphere[id6][0],self.sphere[id6][2]])
-                                #b6z = self.InPlane([self.mins[n][0],self.mins[n][1]],
-                                #                   [self.maxs[n][0],self.maxs[n][1]],
-                                #                   [self.sphere[id6][0],self.sphere[id6][1]])
+                                                   [self.sphere[id2][1],self.sphere[id2][2]])
+                                # Count if we've finished a full line or only a part line, but have still reached the end
+                                if not b0x and (ix%(self.nLevelCoords[n][0]-1)==0) and ix != 0:
+                                    nf+=1                    
+                                if b2x:
+                                    nextx = self.nLevelCoords[n][0]-1 - int(hx*dtx)
+                                    print "Check off by one"
+                                    print nextx
+                                else: nextx = self.nLevelCoords[n][0]-1
 
-                                # id2 = self.mlen[n] + k1*k2iz     + k4*(iy+1) + ((ix+1) % (self.nLevelCoords[n][0]-1))
-                                # id5 = self.mlen[n] + k3*(iz+1) + k3*iy     + ((ix+1) % (self.nLevelCoords[n][0]-1))
-                        
-                                if b0x:
-                                    k1 = int(self.nLevelCoords[n][0] - hx*dtx)
-                                else: k1 = self.nLevelCoords[n][0]
-                                #if b6x:
-                                #    k3 = int(self.nLevelCoords[n][0] - hx*dtx)
-                                #else: k3 = self.nLevelCoords[n][0]
-                                #if b0y:
-                                #    k2 = int(self.nLevelCoords[n][1] - hy*dty)
-                                #else:  k2 = self.nLevelCoords[n][1]
-                                #if b6y:
-                                #    k4 = int(self.nLevelCoords[n][1] - hy*dty)
-                                #else: k4 = self.nLevelCoords[n][1]
-                                id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,iy,iz,k1,k2)
-                        
+                                # Recompute with final coordinates
+                                id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,iy,iz,totalxy,nextxy,nf,shortx,nextx)              
                                 line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
                                 ls.append(line)
                                 self.ncell +=1
+                                nn+=1
+                                
                         # All of the finest mesh level gets written out
                         else:
                             line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
                             ls.append(line)
                             self.ncell +=1
+                            nn +=1
+                thisxy = xycount
+                total += xycount
         print str(self.ncell) + " Cells in the mesh."
         return ls
             

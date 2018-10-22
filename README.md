@@ -1,6 +1,6 @@
 # JUPITER .dat to .vtk file conversion class
 
-`v1.1`
+`v1.2`
 
 Evert Nasedkin, October 10 2018
 
@@ -53,10 +53,14 @@ On importing the coordinate grid it is changed from left handed to right
 handed (azimuthal and polar angles)*-1
 
 ## Known Issues
-AMR processing still doesn't work - multiple data points stored for the same 
-physical location due to overlapping levels of mesh refinement
+AMR should work...
 
 ## Changelog
+v1.1
 Added filtering of vertices and cells to remove overlapping regions (not working properly)
 Refactored code to be more modular (ie SphereToCart was added) and remove duplicate code
 Improved scriptability by adding extra user facing functions, with a template python script
+
+v1.2
+Changed calculation of vertex indices - count points in plane rather than multiplying axes
+Lots of minor +-1 changes to ensure index/coordinate computations are done correctly

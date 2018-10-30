@@ -1,6 +1,6 @@
 # JUPITER .dat to .vtk file conversion class
 
-`v1.2`
+`v1.3`
 
 Evert Nasedkin, October 10 2018
 
@@ -57,10 +57,18 @@ AMR should work...
 
 ## Changelog
 v1.1
-Added filtering of vertices and cells to remove overlapping regions (not working properly)
-Refactored code to be more modular (ie SphereToCart was added) and remove duplicate code
-Improved scriptability by adding extra user facing functions, with a template python script
+- Added filtering of vertices and cells to remove overlapping regions (not working properly)
+- Refactored code to be more modular (ie SphereToCart was added) and remove duplicate code
+- Improved scriptability by adding extra user facing functions, with a template python script
 
 v1.2
-Changed calculation of vertex indices - count points in plane rather than multiplying axes
-Lots of minor +-1 changes to ensure index/coordinate computations are done correctly
+- Changed calculation of vertex indices - count points in plane rather than multiplying axes
+- Lots of minor +-1 changes to ensure index/coordinate computations are done correctly
+
+v1.3.0
+- Completely changed index calculation
+  - documented in ComputeIndices() and ComputeCell()
+  - individually count distinct axes, should deal with edge cases
+- Added functions to check cell skipping, initialisation
+- Separated Filtered and Unfiltered counting
+- So far untested, likely off by one errors, but overall computation should be closer than prev versions.

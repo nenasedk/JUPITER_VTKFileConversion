@@ -106,12 +106,12 @@ class DATtoVTK:
         self.unfiltered = self.mesh = np.zeros((0,0,3),dtype=np.float64) # Unfiltered spherical coords
         self.ncell = 0 # How many cells are there (filtered)
         self.mlen = [0] # How many coordinates in the previous mesh level (unfiltered)
+        self.mlenUF = [0]
         self.coordlist = np.zeros(0) # Which coordinates were filtered out
         self.cellist = [] # Which cells were filtered out
         self.mins = [] # Min boundaries of a each mesh level
         self.maxs = [] # Max boundaries of a each mesh level
-        self.minbound = []
-        self.maxbound = []
+
 
     # ------------------------------------------------------------------------------------------------
 
@@ -239,6 +239,7 @@ class DATtoVTK:
         inds = self.ComputeIndices()
         # Delete overlapping data points
         print len(data)
+        data = self.FilterData(data,self.cellist)
         #self.mesh = np.delete(self.mesh,self.cellist)
         print len(data)
         print len(inds)
@@ -347,9 +348,8 @@ class DATtoVTK:
                     mlen+=1
             tcount += c
             fcount += mlen
-            self.minbound.append([np.min(x1s[l]),np.min(x2s[l]),np.min(x3s[l])])
-            self.maxbound.append([np.max(x1s[l]),np.max(x2s[l]),np.max(x3s[l])])
             self.mlen.append(fcount) # This line is important - fcount if using filtered mesh, tcount else
+            self.mlenUF.append(tcount)
             newcoords.extend(newlev)
             newlev = []
         curlev,c = self.BuildOneLevel(x1s[-1],x2s[-1],x3s[-1])
@@ -505,21 +505,25 @@ class DATtoVTK:
     #
     # Implements basic stride counting
     # -----------------------------------------------
-    def ComputeStructuredCell(self,n,ix,iy,iz):
-        id0 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*iy     + ix
-        id3 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*(iy+1) + ix
-        id4 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*iy     + ix
-        id7 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*(iy+1) + ix
-        if(n == 0): # Only the base mesh level returns to the original location
-            id1 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*iy     + ((ix+1) % (self.nLevelCoords[n][0]-1))
-            id2 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*(iy+1) + ((ix+1) % (self.nLevelCoords[n][0]-1))
-            id5 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*iy     + ((ix+1) % (self.nLevelCoords[n][0]-1))
-            id6 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*(iy+1) + ((ix+1) % (self.nLevelCoords[n][0]-1))
+    def ComputeStructuredCell(self,n,ix,iy,iz,filtered = True):
+        if filtered:
+            k1 = self.mlen[n]
         else:
-            id1 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*iy     + (ix+1)
-            id2 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*(iy+1) + (ix+1)
-            id5 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*iy     + (ix+1)
-            id6 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*(iy+1) + (ix+1)
+            k1 = self.mlenUF[n]
+        id0 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*iy     + ix
+        id3 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*(iy+1) + ix
+        id4 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*iy     + ix
+        id7 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*(iy+1) + ix
+        if(n == 0): # Only the base mesh level returns to the original location
+            id1 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*iy     + ((ix+1) % (self.nLevelCoords[n][0]-1))
+            id2 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*(iy+1) + ((ix+1) % (self.nLevelCoords[n][0]-1))
+            id5 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*iy     + ((ix+1) % (self.nLevelCoords[n][0]-1))
+            id6 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*(iy+1) + ((ix+1) % (self.nLevelCoords[n][0]-1))
+        else:
+            id1 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*iy     + (ix+1)
+            id2 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*(iy+1) + (ix+1)
+            id5 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*iy     + (ix+1)
+            id6 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*(iy+1) + (ix+1)
         return id0,id1,id2,id3,id4,id5,id6,id7
 
     # -----------------------------------------------
@@ -909,7 +913,7 @@ class DATtoVTK:
                 nextus = int((self.nLevelCoords[n][0])*(self.nLevelCoords[n][1]))
                 for iy in range(self.nLevelCoords[n][1] -1):
                     for ix in range(self.nLevelCoords[n][0] -1):
-                            id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeStructuredCell(n,ix,iy,iz)
+                            id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeStructuredCell(n,ix,iy,iz,False)
                             # Look at the unfiltered grid to build a list of cells to remove from the input data
                             line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
                             #ls.append(line)
@@ -1085,12 +1089,10 @@ class DATtoVTK:
                 inds[curcount][ind] = inds[curcount][ind] - d
             curcount +=1
         return inds
-
     def FilterData(self,data,dels):
         print "Filtering Data"
         data = np.delete(data,dels)
         return data
-
     def find_nearest(self,array,value):
         idx = np.searchsorted(array, value, side="left")
         if idx > 0 and (idx == len(array) or (array[idx] > value)):

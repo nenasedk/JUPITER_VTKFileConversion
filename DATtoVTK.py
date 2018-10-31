@@ -249,7 +249,7 @@ class DATtoVTK:
             data = [x*self.DENS for x in data]#.value
         if("temperature" in self.feature):
             data = [x*self.TEMP for x in data]#.value
-        print str(self.ListLen(data)) + " data points for " + self.feature
+        print str(len(data)) + " data points for " + self.feature
         self.WriteToVTK(data, inds, binary)
 
 
@@ -298,7 +298,6 @@ class DATtoVTK:
                     th.append(cur)
                     cur = []
             self.nLevelCoords.append([len(phi[i]),len(r[i]),len(th[i])])
-            self.nlevelh.append([phi[1]-phi[0],r[1]-r[0],th[1]-th[0]])
             dsc.close()
         self.unfiltered = self.BuildGrid(phi,r,th)
         self.sphere,self.coordlist = self.FilterCoords(phi,r,th)
@@ -417,6 +416,7 @@ class DATtoVTK:
             print "Something went wrong reading in the coordinates. Please try again."
             sys.exit(1)
         for i in range(len(x1s)):
+            self.nLevelh.append([x1s[i][1]-x1s[i][0],x2s[i][1]-x2s[i][0],x3s[i][1]-x3s[i][0]])
             tg,c = self.BuildOneLevel(x1s[i], x2s[i], x3s[i])
             grid.extend(tg)
             lcount.append(c)
@@ -468,7 +468,7 @@ class DATtoVTK:
     # ------------------------------------------
     def ComputePlanes(self,mins,maxs,aline,axis = 0):
         x = y = z = 0
-        b0 = b2 = b4 = b6 = False
+        b0 = b3 = b4 = b7 = False
         if( axis == 0):
             y = 1
             z = 2
@@ -482,20 +482,21 @@ class DATtoVTK:
             z = 1
         else:
             print "Not a valid axis, returning False"
-            return b0,b2,b4,b6
-        b0 = self.InPlane([self.mins[n][y],self.mins[n][z]],
-                           [self.maxs[n][y],self.maxs[n][z]],
-                           [self.sphere[aline[0]][y],self.sphere[aline[0]][z]])
-        b3 = self.InPlane([self.mins[n][y],self.mins[n][z]],
-                           [self.maxs[n][y],self.maxs[n][z]],
-                           [self.sphere[aline[3]][y],self.sphere[aline[3]][z]])
-        b4 = self.InPlane([self.mins[n][y],self.mins[n][z]],
-                           [self.maxs[n][y],self.maxs[n][z]],
-                           [self.sphere[aline[4]][y],self.sphere[aline[4]][z]])
-        b7 = self.InPlane([self.mins[n][y],self.mins[n][z]],
-                           [self.maxs[n][y],self.maxs[n][z]],
-                           [self.sphere[aline[7]][y],self.sphere[aline[7]][z]])
-        return b0,b2,b4,b6
+            return b0,b3,b4,b7
+
+        b0 = self.InPlane([mins[y],mins[z]],
+                          [maxs[y],maxs[z]],
+                          [self.sphere[aline[0]][y],self.sphere[aline[0]][z]])
+        b3 = self.InPlane([mins[y],mins[z]],
+                          [maxs[y],maxs[z]],
+                          [self.sphere[aline[3]][y],self.sphere[aline[3]][z]])
+        b4 = self.InPlane([mins[y],mins[z]],
+                          [maxs[y],maxs[z]],
+                          [self.sphere[aline[4]][y],self.sphere[aline[4]][z]])
+        b7 = self.InPlane([mins[y],mins[z]],
+                          [maxs[y],maxs[z]],
+                          [self.sphere[aline[7]][y],self.sphere[aline[7]][z]])
+        return b0,b3,b4,b7
 
     # -----------------------------------------------
     # ComputeStructuredCell
@@ -594,28 +595,28 @@ class DATtoVTK:
     def InitialCell(self,n,dtx,dty):
         id0 = self.mlen[n]
         id1 = self.mlen[n] + 1
-        if InPlane([self.mins[n][1],self.mins[n][2]],
+        if self.InPlane([self.mins[n][1],self.mins[n][2]],
                    [self.maxs[n][1],self.maxs[n][2]],
                    [self.sphere[id0][1],self.sphere[id0][2]]):
-            id3 = self.mlen[n] + self.nLevelCoords[n] - int(dtx/self.nLevelh[n][0])
-            id2 = self.mlen[n] + self.nLevelCoords[n] - int(dtx/self.nLevelh[n][0]) + 1
+            id3 = self.mlen[n] + self.nLevelCoords[n][0] - int(dtx/self.nLevelh[n][0])
+            id2 = self.mlen[n] + self.nLevelCoords[n][0] - int(dtx/self.nLevelh[n][0]) + 1
         else:
-            id3 = self.mlen[n] + self.nLevelCoords[n] - int(dtx/self.nLevelh[n][0])
-            id2 = self.mlen[n] + self.nLevelCoords[n] - int(dtx/self.nLevelh[n][0]) + 1
+            id3 = self.mlen[n] + self.nLevelCoords[n][0] - int(dtx/self.nLevelh[n][0])
+            id2 = self.mlen[n] + self.nLevelCoords[n][0] - int(dtx/self.nLevelh[n][0]) + 1
         if self.sphere[id0][2] > self.mins[n][2]:
-            id4 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1] - int((dtx/self.nLevelh[n][0] -1)(dty/self.nLevelh[n][1] -1))
-            id5 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1] - int((dtx/self.nLevelh[n][0] -1)(dty/self.nLevelh[n][1] -1)) + 1
+            id4 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1] - int((dtx/self.nLevelh[n][0] -1)*(dty/self.nLevelh[n][1] -1))
+            id5 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1] - int((dtx/self.nLevelh[n][0] -1)*(dty/self.nLevelh[n][1] -1)) + 1
         else:
             id4 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1] 
             id5 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1] + 1
-        if InPlane([self.mins[n][1],self.mins[n][2]],
+        if self.InPlane([self.mins[n][1],self.mins[n][2]],
                    [self.maxs[n][1],self.maxs[n][2]],
                    [self.sphere[id4][1],self.sphere[id4][2]]):
-            id6 = id4 + self.nLevelCoords[n] - int(dtx/self.nLevelh[n][0])
-            id7 = id4 + self.nLevelCoords[n] - int(dtx/self.nLevelh[n][0]) + 1
+            id6 = id4 + self.nLevelCoords[n][0] - int(dtx/self.nLevelh[n][0])
+            id7 = id4 + self.nLevelCoords[n][0] - int(dtx/self.nLevelh[n][0]) + 1
         else:
-            id6 = id4 + self.nLevelCoords[n]
-            id7 = id4 + self.nLevelCoords[n] + 1
+            id6 = id4 + self.nLevelCoords[n][0]
+            id7 = id4 + self.nLevelCoords[n][0] + 1
         return id0,id1,id2,id3,id4,id5,id6,id7
 
 
@@ -639,33 +640,33 @@ class DATtoVTK:
         # short: number of indices within the hole
         
         i3 = i4 = i7 = 0
-        if (not b0s[0]):
-            if  bs0[1] and b3s[0]:
+        if (not b0s[0]): # 'Bottom' edge of hole
+            if  b0s[1] and b3s[0]:
                 i3 = ix3
             else:
                 i3 = ix3+1
             if  b0s[2] and b4s[0]:
-                i4 = i4x
+                i4 = ix4
             else:
-                i4 = i4x+1
+                i4 = ix4+1
             if  b3s[2] and b7s[0]:
-                i7 = i7x
+                i7 = ix7
             else:
-                i7 = i7x+1
+                i7 = ix7+1
             return i3,i4,i7
-        if b0s[0]:
+        if b0s[0]: # 'Top' Edge of hole
             if (not b3s[0]) and b3s[1]:
-                i3 = i3x + short
+                i3 = ix3 + short
             else:
-                i3 = i3x + 1
+                i3 = ix3 + 1
             if (not b4s[0]) and b4s[2]:
-                i4 = i4x + short
+                i4 = ix4 + short
             else:
-                i4 = i4x + 1
-            if (not b7s[x]) and (not b3s[2]):
-                i7 = i7x + short
+                i4 = ix4 + 1
+            if (not b7s[0]) and (not b3s[2]):
+                i7 = ix7 + short
             else:
-                i7 = i7 + 1
+                i7 = ix7 + 1
             return i3,i4,i7
 
     # ----------------------------------------
@@ -677,15 +678,15 @@ class DATtoVTK:
     # less than or equal to the cell size
     def SkipCell(self,aline,hx):
         skip = False
-        eps = 1e-20 # just make sure that it's actually bigger than the step size
-        if self.sphere[aline[1]][0] - self.sphere[aline[0]][0] > (hx+eps):
+        eps = 1e-25 # just make sure that it's actually bigger than the step size
+        if self.sphere[aline[2]][0] - self.sphere[aline[0]][0] > (hx+eps):
             skip = True
-        if self.sphere[aline[2]][0] - self.sphere[aline[3]][0] > (hx+eps):
+        if self.sphere[aline[6]][0] - self.sphere[aline[0]][0] > (hx+eps):
             skip = True
-        if self.sphere[aline[5]][0] - self.sphere[aline[4]][0] > (hx+eps):
-            skip = True
-        if self.sphere[aline[6]][0] - self.sphere[aline[7]][0] > (hx+eps):
-            skip = True
+        #if self.sphere[aline[5]][0] - self.sphere[aline[4]][0] > (hx+eps):
+        #    skip = True
+        #if self.sphere[aline[6]][0] - self.sphere[aline[7]][0] > (hx+eps):
+        #    skip = True
         return skip
 
     # ---------------------------------------------------
@@ -701,6 +702,7 @@ class DATtoVTK:
         ##
         ls = []
         nn = xycount = nprev = 0
+        id0=id1=id2=id3=id4=id5=id6=id7=0
         for n in range(self.nLevel):
             # ----------------------------------------------------------------
             ##
@@ -721,20 +723,20 @@ class DATtoVTK:
                 dtx = self.maxs[n][0] - self.mins[n][0]
                 dty = self.maxs[n][1] - self.mins[n][1]
                 dtz = self.maxs[n][2] - self.mins[n][2]
-
+            
                 shortx = int((self.nLevelCoords[n][0])-int(round(dtx/hx -1))) #
                 shorty = int((self.nLevelCoords[n][1])-int(round(dty/hy -1)))
                 nfullx = self.nLevelCoords[n][1] - shorty
 
-            # Counting
-            nprev = xycount = 0
+                # Intialise cell
+                id0,id1,id2,id3,id4,id5,id6,id7 = self.InitialCell(n,dtx,dty) #Cell vertex indices
+                line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
+                b0x,b3x,b4x,b7x = self.ComputePlanes(self.mins[n],self.maxs[n],line,0)
+                b0y,b3y,b4y,b7y = self.ComputePlanes(self.mins[n],self.maxs[n],line,1)
+                b0z,b3z,b4z,b7z = self.ComputePlanes(self.mins[n],self.maxs[n],line,2)
 
-            # Intialise cell
-            id0,id1,id2,id3,id4,id5,id6,id7 = self.InitialCell(n,dtx) #Cell vertex indices
-            line = np.array(id0,id1,id2,id3,id4,id5,id6,id7)
-            b0x,b3x,b4x,b7x = self.ComputePlanes(self.mins[n],self.maxs[n],line,0)
-            b0y,b3y,b4y,b7y = self.ComputePlanes(self.mins[n],self.maxs[n],line,1)
-            b0z,b3z,b4z,b7z = self.ComputePlanes(self.mins[n],self.maxs[n],line,2)
+            # Counting
+            nprev = xycount = 0     
             # ----------------------------------------------------------------
             ##############################################################
             #                                                            #
@@ -748,10 +750,12 @@ class DATtoVTK:
                 ##
                 nprev += xycount
                 # How many points are in the current plane?
-                if self.sphere[id0][2]> self.mins[n][2] and self.sphere[id0][2]< self.maxs[n][2]:
-                    xycount = (nfullx*self.nLevelCoords[n][0]) + (shorty*shortx)
-                else:
-                    xycount = self.nLevelCoords[n][0]*self.nLevelCoords[n][1]
+                if n<self.nLevel-1:
+                    if self.sphere[id0][2]> self.mins[n][2] and self.sphere[id0][2]< self.maxs[n][2]:
+                        xycount = (nfullx*self.nLevelCoords[n][0]) + (shorty*shortx)
+                    else:
+                        xycount = self.nLevelCoords[n][0]*self.nLevelCoords[n][1]
+                else: xycount = self.nLevelCoords[n][0]*self.nLevelCoords[n][1]
                 # Counters for completed lines
                 nf = nf4 = 0
                 for iy in range(self.nLevelCoords[n][1] - 1):
@@ -776,12 +780,13 @@ class DATtoVTK:
                                 # - How many full x axes up to this iy in the above plane
                                 # - How many short axes up to this iy in the above plane
                                 k2 = ((nfullx - (nf+1))*self.nLevelCoords[n][0]) +\
-                                     ((shorty - (iy * nf))*shortx) +\
+                                     ((shorty - (iy - nf))*shortx) +\
                                      (nf4 * self.nLevelCoords[n][0]) +\
                                      (iy-nf4)*shortx                      
                             else:
+                                # maybe (iy + 1 -nf) in line 2
                                 k2 = ((nfullx - (nf))*self.nLevelCoords[n][0]) +\
-                                     ((shorty - (iy * nf))*shortx)+\
+                                     ((shorty - (iy - nf))*shortx)+\
                                      (nf4 * self.nLevelCoords[n][0]) +\
                                      (iy-nf4)*shortx
                                 
@@ -840,7 +845,7 @@ class DATtoVTK:
  
                             # //////////////////////////////////////
                             # Actually compute the indices of each vertex
-                            id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,i3x,i4x,i7x,iy,iz,
+                            id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,ix3,ix4,ix7,iy,iz,
                                                                            k1,k2,k3,k4,k5,k6,k7,k8)
                             line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
 
@@ -882,6 +887,7 @@ class DATtoVTK:
                                                              self.nLevelCoords[n][0] - shortx - 1)
                             # We made it!
                         else:
+                            nn+=1
                             id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeStructuredCell(n,ix,iy,iz)
                             line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
                             ls.append(line)
@@ -889,7 +895,7 @@ class DATtoVTK:
         # Output to terminal, return the list of vertex indices
         print str(self.ncell) + " Cells in the mesh."
         print nn
-        print (self.nLevelCoords[1][0]-1)*(self.nLevelCoords[1][1]-1)*(self.nLevelCoords[1][2]-1),(self.nLevelCoords[0][0]-1)*(self.nLevelCoords[0][1]-1)*(self.nLevelCoords[0][2]-1)
+        #print (self.nLevelCoords[1][0]-1)*(self.nLevelCoords[1][1]-1)*(self.nLevelCoords[1][2]-1),(self.nLevelCoords[0][0]-1)*(self.nLevelCoords[0][1]-1)*(self.nLevelCoords[0][2]-1)
         print len(ls)
         return ls
 

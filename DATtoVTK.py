@@ -676,13 +676,23 @@ class DATtoVTK:
     # Checks this by comparing the distance between
     # two consecutive indices and ensureing it is
     # less than or equal to the cell size
-    def SkipCell(self,aline,hx):
+    def SkipCell(self,aline,n):
         skip = False
-        eps = 1e-25 # just make sure that it's actually bigger than the step size
-        if self.sphere[aline[2]][0] - self.sphere[aline[0]][0] > (hx+eps):
+        eps = 1e-10 # just make sure that it's actually bigger than the step size
+        if (abs(self.sphere[aline[4]][0] - self.sphere[aline[0]][0]) > eps):
             skip = True
-        if self.sphere[aline[6]][0] - self.sphere[aline[0]][0] > (hx+eps):
+        if (abs(self.sphere[aline[7]][0] - self.sphere[aline[0]][0]) > eps):
             skip = True
+        if (abs(self.sphere[aline[6]][0] - self.sphere[aline[0]][0]) < eps):
+            skip = True
+        if (abs(self.sphere[aline[7]][0] - self.sphere[aline[2]][0]) < eps):
+            skip = True
+        cell = [(self.sphere[aline[6]][0] + self.sphere[aline[0]][0])/2,
+                (self.sphere[aline[6]][1] + self.sphere[aline[0]][1])/2,
+                (self.sphere[aline[6]][2] + self.sphere[aline[0]][2])/2]
+        if self.InRange(self.mins[n],self.maxs[n],cell):
+            skip = True
+                 
         #if self.sphere[aline[5]][0] - self.sphere[aline[4]][0] > (hx+eps):
         #    skip = True
         #if self.sphere[aline[6]][0] - self.sphere[aline[7]][0] > (hx+eps):
@@ -856,7 +866,7 @@ class DATtoVTK:
                             b0z,b3z,b4z,b7z = self.ComputePlanes(self.mins[n],self.maxs[n],line,2)
 
                             # Check if we're skipping this one
-                            if self.SkipCell(line,hx):
+                            if self.SkipCell(line,n):
                                 ix3,ix4,ix7 = self.IncrementAxes(ix3,ix4,ix7,
                                                                  [b0x,b0y,b0z],
                                                                  [b3x,b3y,b3z],

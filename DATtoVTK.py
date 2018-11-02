@@ -445,7 +445,8 @@ class DATtoVTK:
         if not os.path.isfile(self.dataOutPath + self.outFilename):
             self.VTKFormatOut(data,inds,  binary)
         else:
-            userstr = self.ask("Output file already exists, do you want to overwrite or append data?",("Overwrite","Append","Quit"))
+            userstr = self.ask("Output file already exists, do you want to overwrite or append data?",
+                               ("Overwrite","Append","Quit"))
             if userstr is 'Overwrite':
                 self.VTKFormatOut(data,inds,binary, False)
                 return
@@ -607,7 +608,7 @@ class DATtoVTK:
                             [self.sphere[id0][1],self.sphere[id0][2]]):
                 id3 = self.mlen[n] + self.nLevelCoords[n][0] - int(dtx/self.nLevelh[n][0]-1)
                 id2 = self.mlen[n] + self.nLevelCoords[n][0] - int(dtx/self.nLevelh[n][0]-1) + 1
-            if self.sphere[id0][2] > self.mins[n][2]:
+            if self.sphere[id0][2] > (self.mins[n][2]-1.0e-5):
                 id4 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1] - int((dtx/self.nLevelh[n][0] -1)*(dty/self.nLevelh[n][1] -1))
                 id5 = self.mlen[n] + self.nLevelCoords[n][0]*self.nLevelCoords[n][1] - int((dtx/self.nLevelh[n][0] -1)*(dty/self.nLevelh[n][1] -1)) + 1
             if self.InPlane([self.mins[n][1],self.mins[n][2]],
@@ -776,8 +777,13 @@ class DATtoVTK:
                 nprev += xycount
                 # How many points are in the current plane?
                 xycount = self.nLevelCoords[n][0]*self.nLevelCoords[n][1]
+                # print self.mins[n]
+                # print self.sphere[id0]
+                # print self.sphere[id0+2]
+                # print self.sphere[id7+2]
+                # print self.maxs[n]
                 if n<self.nLevel-1:
-                    if self.sphere[id0+2][2]> self.mins[n][2] and self.sphere[id0+2][2]< self.maxs[n][2]:
+                    if self.sphere[id0+2][2]> (self.mins[n][2]-1.0e-5) and self.sphere[id0+2][2]< (self.maxs[n][2]+1.0e-5):
                         xycount = (nfullx*self.nLevelCoords[n][0]) + (shorty*shortx)
                 # Counters for completed lines
                 nf = nf4 = 0

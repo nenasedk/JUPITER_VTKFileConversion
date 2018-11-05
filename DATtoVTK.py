@@ -677,6 +677,9 @@ class DATtoVTK:
                 i3 = ix3 + short
                 skip = True
             else:
+                if (((self.sphere[line[2]][0] - self.sphere[line[3]][0]) > (1.5*self.nLevelh[n][0]))
+                    and (np.absolute(line[2] - line[3])<2)):
+                    skip = True
                 i3 = ix3 + 1
             if (not b4s[0]) and self.InPlane([self.mins[n][0],self.mins[n][1]],
                                              [self.maxs[n][0],self.maxs[n][1]],
@@ -684,6 +687,9 @@ class DATtoVTK:
                 i4 = ix4 + short
                 skip = True
             else:
+                if (((self.sphere[line[5]][0] - self.sphere[line[4]][0]) > (1.5*self.nLevelh[n][0]))
+                    and (np.absolute(line[5] - line[4])<2)):
+                    skip = True
                 i4 = ix4 + 1
             if (not b7s[0]) and self.InPlane([self.mins[n][0],self.mins[n][1]],
                                              [self.maxs[n][0],self.maxs[n][1]],
@@ -691,6 +697,9 @@ class DATtoVTK:
                 i7 = ix7 + short
                 skip = True
             else:
+                if (((self.sphere[line[6]][0] - self.sphere[line[7]][0]) > (1.5*self.nLevelh[n][0]))
+                    and (np.absolute(line[6] - line[7])<2)):
+                    skip = True
                 i7 = ix7 + 1
             return i3,i4,i7,skip
 

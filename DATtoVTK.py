@@ -350,7 +350,7 @@ class DATtoVTK:
             self.maxs.append([np.max(x1s[i]),np.max(x2s[i]),np.max(x3s[i])])
             tg,c = self.BuildOneLevel(x1s[i], x2s[i], x3s[i])
             grid.extend(tg)
-            self.mlenUF.append(tg.shape[0])
+            self.mlenUF.append(self.mlenUF[i] + tg.shape[0])
             lcount.append(c)
         return np.array(grid)
 
@@ -420,10 +420,8 @@ class DATtoVTK:
         #               0-------1                   0----->phi x
         #
         #
-        if filtered:
-            k1 = self.mlen[n]
-        else:
-            k1 = self.mlenUF[n]
+
+        k1 = self.mlenUF[n]
         id0 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*iy     + ix
         id3 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*iz     + self.nLevelCoords[n][0]*(iy+1) + ix
         id4 = k1 + self.nLevelCoords[n][0]*self.nLevelCoords[n][1]*(iz+1) + self.nLevelCoords[n][0]*iy     + ix

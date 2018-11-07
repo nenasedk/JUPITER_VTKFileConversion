@@ -297,7 +297,7 @@ class DATtoVTK:
             dsc.close()
         self.unfiltered = self.BuildGrid(phi,r,th)
         self.sphere,self.coordlist = self.FilterCoords(phi,r,th)
-        self.mesh = self.SphereToCart(self.sphere)
+        self.mesh = self.SphereToCart(self.unfiltered)
         print(str(self.sphere.shape[0]) + " Vertices in filtered grid.")
 
 
@@ -436,11 +436,11 @@ class DATtoVTK:
     # --------------------------------------------------
     def WriteToVTK(self, data, inds, binary = True, append = False):
         # Data quality checking
-        try:
-            assert(len(data) == self.ncell)
-        except ValueError:
-            print "Error: Number of data points does not match number of mesh elements"
-            return
+        #try:
+        #    assert(len(data) == self.ncell)
+        #except ValueError:
+        #    print "Error: Number of data points does not match number of mesh elements"
+        #    return
         # File existance check
         if not os.path.isfile(self.dataOutPath + self.outFilename):
             self.VTKFormatOut(data,inds,  binary)
@@ -564,23 +564,25 @@ class DATtoVTK:
         # ---------------------------------------------------------------------------------------
         #print k1,k2,k3,k4
 
-        id0 = self.mlen[n] + k1      + k3*(self.nLevelCoords[n][0]) + (iy-k3)*k5      + ix
-        id1 = self.mlen[n] + k1      + k3*(self.nLevelCoords[n][0]) + (iy-k3)*k5      + ix +1
-        id2 = self.mlen[n] + k1      + k3*(self.nLevelCoords[n][0]) + (iy-k3)*k5 + k4 + i3x+1
-        id3 = self.mlen[n] + k1      + k3*(self.nLevelCoords[n][0]) + (iy-k3)*k5 + k4 + i3x
-        id4 = self.mlen[n] + k1 + k2 + k6*(self.nLevelCoords[n][0]) + (iy-k6)*k5      + i4x
-        id5 = self.mlen[n] + k1 + k2 + k6*(self.nLevelCoords[n][0]) + (iy-k6)*k5      + i4x+1
-        id6 = self.mlen[n] + k1 + k2 + k6*(self.nLevelCoords[n][0]) + (iy-k6)*k5 + k7 + i7x+1
-        id7 = self.mlen[n] + k1 + k2 + k6*(self.nLevelCoords[n][0]) + (iy-k6)*k5 + k7 + i7x
+        linelen = self.nLevelCoords[n][0]
+        
+        id0 = self.mlen[n] + k1      + k3*linelen + (iy-k3)*k5      + ix
+        id1 = self.mlen[n] + k1      + k3*linelen + (iy-k3)*k5      + ix +1
+        id2 = self.mlen[n] + k1      + k3*linelen + (iy-k3)*k5 + k4 + i3x+1
+        id3 = self.mlen[n] + k1      + k3*linelen + (iy-k3)*k5 + k4 + i3x
+        id4 = self.mlen[n] + k1 + k2 + k6*linelen + (iy-k6)*k5      + i4x
+        id5 = self.mlen[n] + k1 + k2 + k6*linelen + (iy-k6)*k5      + i4x+1
+        id6 = self.mlen[n] + k1 + k2 + k6*linelen + (iy-k6)*k5 + k7 + i7x+1
+        id7 = self.mlen[n] + k1 + k2 + k6*linelen + (iy-k6)*k5 + k7 + i7x
         if(n == 0): # Only the base mesh level returns to the original location
             if((ix+1)  % (k8[0]-1)) == 0:
-                id1 = self.mlen[n] + k1      + k3*(self.nLevelCoords[n][0]) + (iy-k3)*k5
+                id1 = self.mlen[n] + k1      + k3*linelen + (iy-k3)*k5
             if((i3x+1)  % (k8[1]-1)) == 0:
-                id2 = self.mlen[n] + k1      + k3*(self.nLevelCoords[n][0]) + (iy-k3)*k5 + k4
+                id2 = self.mlen[n] + k1      + k3*linelen + (iy-k3)*k5 + k4
             if((i4x+1)  % (k8[2]-1)) == 0:
-                id5 = self.mlen[n] + k1 + k2 + k6*(self.nLevelCoords[n][0]) + (iy-k6)*k5
+                id5 = self.mlen[n] + k1 + k2 + k6*linelen + (iy-k6)*k5
             if((i7x+1)  % (k8[3]-1)) == 0:
-                id6 = self.mlen[n] + k1 + k2 + k6*(self.nLevelCoords[n][0]) + (iy-k6)*k5 + k7
+                id6 = self.mlen[n] + k1 + k2 + k6*linelen + (iy-k6)*k5 + k7
         return id0,id1,id2,id3,id4,id5,id6,id7
 
     
@@ -664,16 +666,16 @@ class DATtoVTK:
                 skip = True
             else:
                 i4 = ix4+1
-            if  b3s[2] and b7s[0]:
+            if  b4s[1] and b7s[0]:
                 i7 = ix7
                 skip = True
             else:
                 i7 = ix7+1
             return i3,i4,i7,skip
         if b0s[0]: # 'Top' Edge of hole
-            if (not b3s[0]) and self.InPlane([self.mins[n][0],self.mins[n][2]],
-                                             [self.maxs[n][0],self.maxs[n][2]],
-                                             [self.sphere[line[2]][0],self.sphere[line[2]][2]]):
+            if (not b3s[0]) and b3s[1]:#self.InPlane([self.mins[n][0],self.mins[n][2]],
+                #             [self.maxs[n][0],self.maxs[n][2]],
+                #             [self.sphere[line[2]][0],self.sphere[line[2]][2]]):
                 i3 = ix3 + short
                 skip = True
             else:
@@ -681,9 +683,9 @@ class DATtoVTK:
                     and (np.absolute(line[2] - line[3])<2)):
                     skip = True
                 i3 = ix3 + 1
-            if (not b4s[0]) and self.InPlane([self.mins[n][0],self.mins[n][1]],
-                                             [self.maxs[n][0],self.maxs[n][1]],
-                                             [self.sphere[line[5]][0],self.sphere[line[5]][1]]):
+            if (not b4s[0]) and b4s[2]:#self.InPlane([self.mins[n][0],self.mins[n][1]],
+                #             [self.maxs[n][0],self.maxs[n][1]],
+                #             [self.sphere[line[5]][0],self.sphere[line[5]][1]]):
                 i4 = ix4 + short
                 skip = True
             else:
@@ -691,9 +693,9 @@ class DATtoVTK:
                     and (np.absolute(line[5] - line[4])<2)):
                     skip = True
                 i4 = ix4 + 1
-            if (not b7s[0]) and self.InPlane([self.mins[n][0],self.mins[n][1]],
-                                             [self.maxs[n][0],self.maxs[n][1]],
-                                             [self.sphere[line[5]][0],self.sphere[line[5]][1]]):
+            if (not b7s[0]) and b3s[1]:#self.InPlane([self.mins[n][0],self.mins[n][1]],
+                #             [self.maxs[n][0],self.maxs[n][1]],
+                #             [self.sphere[line[5]][0],self.sphere[line[5]][1]]):
                 i7 = ix7 + short
                 skip = True
             else:
@@ -747,7 +749,7 @@ class DATtoVTK:
             ##
             ## Mesh refinement level Variables
             ##
-            
+            '''
             # Step Sizes
             hx = self.nLevelh[n][0]
             hy = self.nLevelh[n][1]
@@ -764,13 +766,13 @@ class DATtoVTK:
                 dtx = np.absolute(self.maxs[n][0] - self.mins[n][0])
                 dty = np.absolute(self.maxs[n][1] - self.mins[n][1])
                 dtz = np.absolute(self.maxs[n][2] - self.mins[n][2])
-                shortx = int((self.nLevelCoords[n][0])-int(round(dtx/hx ))) # dtx/hx-1
+                shortx = int((self.nLevelCoords[n][0])-int(round(dtx/hx -1))) # dtx/hx-1
                 
   
 
             # Intialise cell
-            id0,id1,id2,id3,id4,id5,id6,id7 = self.InitialCell(n,dtx,dty) #Cell vertex indices
-            line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
+            #id0,id1,id2,id3,id4,id5,id6,id7 = self.InitialCell(n,dtx,dty) #Cell vertex indices
+            #line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
             b0x=b3x=b4x=b7x = False
             b0y=b3y=b4y=b7y = False
             b0z=b3z=b4z=b7z = False
@@ -779,7 +781,7 @@ class DATtoVTK:
                 b0y,b3y,b4y,b7y = self.ComputePlanes(self.mins[n],self.maxs[n],line,1)
                 b0z,b3z,b4z,b7z = self.ComputePlanes(self.mins[n],self.maxs[n],line,2)
                 
-            # Counting
+            # Counting'''
             nprev = xycount = 0
             counter = - (self.nLevelCoords[n][1]+self.nLevelCoords[n][0] - 1)
             # ----------------------------------------------------------------
@@ -789,6 +791,7 @@ class DATtoVTK:
             #                                                            #
             ##############################################################
             for iz in range(self.nLevelCoords[n][2]-1):
+                #for iz in range(0,4):
                 # ------------------------------------------------------------
                 ##
                 ## Plane Level Variables
@@ -804,7 +807,7 @@ class DATtoVTK:
                     print self.sphere[id0]
                     print self.sphere[id0+2]
                     print self.maxs[n]
-                    sys.exit(1)'''
+                    sys.exit(1)
                 nfullx = self.nLevelCoords[n][1]
                 xycount = self.nLevelCoords[n][0]*(self.nLevelCoords[n][1])#-1)-1
                 # print self.mins[n]
@@ -813,33 +816,32 @@ class DATtoVTK:
                 # print self.sphere[id7+2]
                 # print self.maxs[n]
                 if n<self.nLevel-1:
-                    if self.sphere[id0+2][2]> (self.mins[n][2]-1.0e-5) and self.sphere[id0+2][2]< (self.maxs[n][2]-1.0e-5):
-                        shorty = int(round(dty/hy -1))
+                    if (self.sphere[id0+1][2]> (self.mins[n][2])
+                        and self.sphere[id0+1][2]< (self.maxs[n][2])):
+                        shorty = int(round(dty/hy)) # -1
                         nfullx = self.nLevelCoords[n][1] - shorty                           
                         xycount = (nfullx*self.nLevelCoords[n][0]) + (shorty*shortx)
-                        
                 # Counters for completed lines
                 nf = nf4 = 0
                 counter = 0
-
+                '''
                 #print "Current Plane"
-                print xycount,nprev,self.ncell,nskip#,line
+                #print xycount,nprev,self.ncell,nskip#,line
                 for iy in range(self.nLevelCoords[n][1] - 1):
+                #for iy in range(1):
                     # Counters for each of the 4 x-axes
                     ix3 = ix4 = ix7 = 0
                     for ix in range(self.nLevelCoords[n][0]-1):
                         if n < (self.nLevel-1): 
                             nn+=1
-                            counter+=1
-
-                            #if ix4 != ix or ix3 != ix:
-                            #    print ix,ix3,ix4,ix7
+                            '''
                             # These are the values sent to the ComputeCell function
                             # The meaning of each is documented in the ComputeCell Function
                             # Yes I know I could just pass things to the function, but this keeps
                             #   me organized.
                             k1 = k2 = k3 = k4 = k5 = k6 = k7 = 0
                             k8 = [0,0,0,0]
+                            
                             #//////////////////////////////////
                             k1 = nprev #Total up to this iz plane
                             #if not b0x:
@@ -856,7 +858,8 @@ class DATtoVTK:
                                 
                             # ///////////////////////////////////   
                             # Number of points from id0 to id3
-                            if (self.sphere[id0+1][0] < self.mins[n][0]): # Check if we're left or right of the hole
+                            if ((self.sphere[id1][0] < self.mins[n][0])
+                                and (id1 > id0)): # Check if we're left or right of the hole
                                 if b0x:
                                     k4 = shortx # What's the length of the current x axis?
                                 else:
@@ -869,7 +872,8 @@ class DATtoVTK:
                                     
                             # ///////////////////////////////////
                             # Number of points from id4 to id7
-                            if (self.sphere[id4+1][0] < self.mins[n][0]):
+                            if ((self.sphere[id5][0] < self.mins[n][0])
+                                and (id5 > id4)):
                                 if b4x:
                                     k7 = shortx
                                 else:
@@ -906,21 +910,26 @@ class DATtoVTK:
                                     k8[3] = shortx
                                 else:
                                     k8[3] = self.nLevelCoords[n][0]
- 
+                            '''
                             # //////////////////////////////////////
                             # Actually compute the indices of each vertex
-                            id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,ix3,ix4,ix7,iy,iz,
-                                                                               k1,k2,k3,k4,k5,k6,k7,k8)
+                            #id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,ix3,ix4,ix7,iy,iz,
+                            #                                                   k1,k2,k3,k4,k5,k6,k7,k8)
+                            id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeStructuredCell(n,ix,iy,iz,False)
                             line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
 
-                            if ix == 0 and iy==0:
-                                print line
-                                print nfullx,shortx,shorty
-                                print k1,k2,k3,k4,k5,k6,k7,k8
-                            if ix == (self.nLevelCoords[n][0]-3) and iy==(self.nLevelCoords[n][1]-3):
-                                print line
-                            if ix == (self.nLevelCoords[n][0]-2) and iy==(self.nLevelCoords[n][1]-2):
-                                print line
+                            skip = False
+                            for ind in line:
+                                if self.InRange(self.mins[n],self.maxs[n],self.unfiltered[ind]):
+                                    skip = True
+                            if skip:
+                                self.cellist.append(nn)
+                                continue
+                            '''
+                            #if ix == (self.nLevelCoords[n][0]-3) and iy==(self.nLevelCoords[n][1]-3):
+                            #    print line
+                            #if ix == (self.nLevelCoords[n][0]-2) and iy==(self.nLevelCoords[n][1]-2):
+                            #    print line
                             # Check positions relative to the hole
                             b0x,b3x,b4x,b7x = self.ComputePlanes(self.mins[n],self.maxs[n],line,0)
                             b0y,b3y,b4y,b7y = self.ComputePlanes(self.mins[n],self.maxs[n],line,1)
@@ -929,7 +938,15 @@ class DATtoVTK:
                                                [self.maxs[n][0],self.maxs[n][2]],
                                                [self.sphere[line[1]][0],self.sphere[line[1]][2]])
                             # Check if we're skipping this one
-
+                            #if ix == 0 and iy==0:y
+                            if b0x or b7x:
+                                print iz,iy,ix,ix3,ix4,ix7
+                                print b0x,b0y,b0z
+                                print b7x,b7y,b7z
+                                print line
+                                print nfullx,shortx,shorty
+                                print k1,k2,k3,k4,k5,k6,k7,k8
+                                print '\n'
                             # ///////////////////////////////////////
                             # Count number of completed axes
                             if (ix+1)%(self.nLevelCoords[n][0]-1)==0:
@@ -940,46 +957,51 @@ class DATtoVTK:
                             # Increment counters
                             ix3,ix4,ix7,skip = self.IncrementAxes(n,ix3,ix4,ix7,
                                                                   line,
-                                                                  self.nLevelCoords[n][0] - shortx - 1)
+                                                                  self.nLevelCoords[n][0] - shortx)
                             if skip:
                                 #print k8
                                 nskip+=1
                                 continue
-                            # Append
+                            # Append Cell to List
+                            '''
                             ls.append(line)
                             self.ncell+=1
 
                             # Check end of line
-                            if b0x and ((ix+1)%shortx==0):
-                                nn += self.nLevelCoords[n][0] - shortx -1
-                                break
+                            #if b0x and ((ix+1)%shortx==0):
+                            #    nn += self.nLevelCoords[n][0] - shortx -1
+                            #    break
                             # We made it!
 
                             
                         else:
                             # There are simpler ways to do this,
                             # but wanted to ensure the full way works properly
+                            '''
                             nn += 1
                             counter+=1
                             k1 = nprev
-                            k2 = ((nfullx - nf)*self.nLevelCoords[n][0]) +\
+                            k2 = ((nfullx - nf)*(self.nLevelCoords[n][0])) +\
                                  ((shorty - (iy - nf))*shortx) +\
-                                 (nf4 * self.nLevelCoords[n][0]) +\
+                                 (nf4 * (self.nLevelCoords[n][0])) +\
                                  (iy-nf4)*shortx
                             k3 = nf
-                            k4 = self.nLevelCoords[n][0]
+                            k4 = (self.nLevelCoords[n][0])
                             k5 = shortx
                             k6 = nf4
-                            k7 = self.nLevelCoords[n][0]
-                            k8 = [self.nLevelCoords[n][0],self.nLevelCoords[n][0],self.nLevelCoords[n][0],self.nLevelCoords[n][0]]
-                            #id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeStructuredCell(n,ix,iy,iz)
-                            id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,ix3,ix4,ix7,iy,iz,
-                                                                               k1,k2,k3,k4,k5,k6,k7,k8)
+                            k7 = (self.nLevelCoords[n][0])
+                            k8 = [self.nLevelCoords[n][0],self.nLevelCoords[n][0],self.nLevelCoords[n][0],self.nLevelCoords[n][0]]'''
+                            id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeStructuredCell(n,ix,iy,iz,False)
+                            #id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeCell(n,ix,ix3,ix4,ix7,iy,iz,
+                             #                                                  k1,k2,k3,k4,k5,k6,k7,k8)
+                                   
                             line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
+                            '''
                             if ix == 0 and iy==0:
-                                print line
+                                print ix,iy,line
                                 print nfullx,shortx,shorty
                                 print k1,k2,k3,k4,k5,k6,k7,k8
+                                print '\n'
                             if ix == (self.nLevelCoords[n][0]-3) and iy==(self.nLevelCoords[n][1]-3):
                                 print line
                             if ix == (self.nLevelCoords[n][0]-2) and iy==(self.nLevelCoords[n][1]-2):
@@ -988,15 +1010,17 @@ class DATtoVTK:
                             #   continue
                             ix3,ix4,ix7,skip = self.IncrementAxes(n,ix3,ix4,ix7,
                                                              line,
-                                                             self.nLevelCoords[n][0] - shortx - 1)
+                                                             self.nLevelCoords[n][0] - shortx)
                             if (ix+1)%(self.nLevelCoords[n][0] -1) == 0:
                                 nf += 1
-                                nf4 += 1
+                                nf4 += 1'''
                             ls.append(line)
                             self.ncell+=1
+                #sys.exit(1)
+                
         # Output to terminal, return the list of vertex indices
         print str(self.ncell) + " Cells in the mesh."
-        print nn
+        print nn#,nskip
         #print (self.nLevelCoords[1][0]-1)*(self.nLevelCoords[1][1]-1)*(self.nLevelCoords[1][2]-1),(self.nLevelCoords[0][0]-1)*(self.nLevelCoords[0][1]-1)*(self.nLevelCoords[0][2]-1)
         return ls
 
@@ -1024,14 +1048,14 @@ class DATtoVTK:
                             # Look at the unfiltered grid to build a list of cells to remove from the input data
                             line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
                             #ls.append(line)
-                            cell = np.array([(self.unfiltered[id0][0] + self.unfiltered[id6][0])/2.,
-                                             (self.unfiltered[id0][1] + self.unfiltered[id6][1])/2.,
-                                             (self.unfiltered[id0][2] + self.unfiltered[id6][2])/2.])
-                            if n < (self.nLevel-1):
-                                if self.InRange(self.mins[n],self.maxs[n],cell):
-                                    # Add to list of data points to remove
-                                    c+=1
-                                    self.cellist.append(nn)
+                            #cell = np.array([(self.unfiltered[id0][0] + self.unfiltered[id6][0])/2.,
+                            #                 (self.unfiltered[id0][1] + self.unfiltered[id6][1])/2.,
+                            #                 (self.unfiltered[id0][2] + self.unfiltered[id6][2])/2.])
+                            #if n < (self.nLevel-1):
+                            #    if self.InRange(self.mins[n],self.maxs[n],cell):
+                            #        # Add to list of data points to remove
+                            #        c+=1
+                            #        self.cellist.append(nn)
                             nn+=1
         print str(c) + " Cells to remove"
         #self.ncell = nn - c

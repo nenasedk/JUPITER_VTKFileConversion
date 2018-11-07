@@ -14,7 +14,7 @@
 
 import DATtoVTK 
 CONT = True
-BINARY = False # Set to false to write ASCII files
+BINARY = True # Set to false to write ASCII files
 while CONT:
     dv = DATtoVTK.DATtoVTK()
     #dv.setBasePath('') # Uncomment this line if DATtoVTK.py is not located in the directory containing the output folders.

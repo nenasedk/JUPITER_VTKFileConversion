@@ -1,6 +1,6 @@
 # JUPITER .dat to .vtk file conversion class
 
-`v1.3`
+`v2.`
 
 Evert Nasedkin, October 10 2018
 
@@ -53,7 +53,6 @@ On importing the coordinate grid it is changed from left handed to right
 handed (azimuthal and polar angles)*-1
 
 ## Known Issues
-AMR should work...
 
 ## Changelog
 v1.1
@@ -65,10 +64,16 @@ v1.2
 - Changed calculation of vertex indices - count points in plane rather than multiplying axes
 - Lots of minor +-1 changes to ensure index/coordinate computations are done correctly
 
-v1.3.0
+v1.3
 - Completely changed index calculation
   - documented in ComputeIndices() and ComputeCell()
   - individually count distinct axes, should deal with edge cases
 - Added functions to check cell skipping, initialisation
 - Separated Filtered and Unfiltered counting
 - So far untested, likely off by one errors, but overall computation should be closer than prev versions.
+
+v2.0
+- Changed index counting again
+- Paraview *can* deal with unused grid points, but not with unused cells
+- Therefore, filtering the grid is unneccsary, we can just remove cells with points in the ROI
+- This works, and is much easier and faster.

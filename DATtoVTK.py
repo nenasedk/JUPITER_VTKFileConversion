@@ -213,10 +213,7 @@ class DATtoVTK:
                 data2 = np.reshape(data2,(3,-1))
                 data3 = np.column_stack((data2[1], data2[0], data2[1]))
                 data3 = data3*self.VEL#.value
-                if i > 0:
-                    data = np.concatenate((data,data3), axis = 0)
-                else:
-                    data = data3
+                data = np.concatenate((data,data3), axis = 0)
 
             else:
                 # Read in binary doubles into a 1D array
@@ -230,7 +227,6 @@ class DATtoVTK:
         if "velocity" in self.feature:
             data = self.SphereToCartDT(data,inds)
         # Convert to CGS units 
-        print data.shape
         if("density" in self.feature):
             data = np.array([x*self.DENS for x in data])#.value
         if("temperature" in self.feature):
@@ -642,5 +638,8 @@ class DATtoVTK:
 
     def FilterData(self,data,dels):
         print "Filtering Data"
-        data = np.delete(data,dels,axis = 0)
+        if "velocity" in self.feature:
+            data = np.delete(data,dels,axis = 0)
+        else:
+            data =  np.delete(data,dels)
         return data

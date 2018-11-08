@@ -213,8 +213,10 @@ class DATtoVTK:
                 data2 = np.reshape(data2,(3,-1))
                 data3 = np.column_stack((data2[1], data2[0], data2[1]))
                 data3 = data3*self.VEL#.value
-                data = np.concatenate((data,data3), axis = 0)
-
+                if i>0:
+                    data = np.concatenate((data,data3), axis = 0)
+                else:
+                    data = data3
             else:
                 # Read in binary doubles into a 1D array
                 #feat = np.fromfile(self.dataDir + self.inFilename, dtype = 'double')
@@ -361,10 +363,12 @@ class DATtoVTK:
             rad = (self.unfiltered[ind[0]][1] + self.unfiltered[ind[6]][1])/2.0 #* self.rcgs
             tht = (self.unfiltered[ind[0]][2] + self.unfiltered[ind[6]][2])/2.0
 
+            # 0 = az (phi), 1 = rad, 2 = pol (tht)
+            # 0 = pol(tht), 1 = az (phi) 2 = rad
             xdot = np.cos(tht)*np.cos(phi)*data[i][2] +\
-                   rad*np.cos(tht)*np.sin(phi)*data[i][1] +\
+                   rad*np.cos(tht)*np.sin(phi)*data[i][1]+\
                    rad*np.sin(tht)*np.cos(phi)*data[i][0]
-            ydot = np.cos(tht)*np.sin(phi)*data[i][1] -\
+            ydot = np.cos(tht)*np.sin(phi)*data[i][2] -\
                    rad*np.cos(tht)*np.cos(phi)*data[i][1] +\
                    rad*np.sin(tht)*np.cos(phi)*data[i][0]
             zdot = np.sin(tht)*data[i][2] -\

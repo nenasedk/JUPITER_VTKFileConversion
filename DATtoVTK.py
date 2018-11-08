@@ -32,15 +32,7 @@
 # Notes:
 # On importing the coordinate grid it is changed from left handed to write handed (azimuthal and polar angles)*-1
 # Warning: Spherical coordinates are ordered (phi,r,theta). Just go with it. (phi is azimuthal, theta is polar)
-#
-#
-# MAJOR FIXME:
-# Need to fix AMR issues:
-# Currently, cells at each mesh level are allowed to overlap
-# In paraview, this leads to weird issues when viewing surface plots - trying to plot data from different cells to the same location.
-# Need to figure out either:
-# a) Write out only non-overlapping cells, choosing the finest grid to write
-# b) Read in data as AMR, plotting only from finest grid.
+
 
 import os,sys
 import numpy as np
@@ -69,10 +61,8 @@ class DATtoVTK:
         # Simulation Information
         self.simNumber = -1 # Which sim output number are we looking at
         self.nLevel = -1 # How many mesh levels are there?
-        self.feature = 'notafeat'
-        self.nLevelCoords = []
-        self.nLevelh = []
-        # density, temperature,energy, erad, opacity, potential, stheat, tau, taucell, velocity
+        self.feature = 'notafeat' # what hydro field are we looking at
+        self.nLevelCoords = [] # How many coordinates along each axis at this mesh refinement level?
         self.featlist = ['gasdensity', 'gastemperature','gasenergy',
                          'gaserad', 'gasopacity', 'gaspotential',
                          'gasstheat', 'gastau', 'gastaucell',
@@ -101,13 +91,10 @@ class DATtoVTK:
         self.VEL = -1.
 
         # Grid Information
-        self.sphere =[]# np.empty(0) # 3D Spherical array - edges (read in and filter)
         self.mesh = np.zeros((0,0,3),dtype=np.float64)   # 3D cartesian array - edges
         self.unfiltered = self.mesh = np.zeros((0,0,3),dtype=np.float64) # Unfiltered spherical coords
-        self.ncell = 0 # How many cells are there (filtered)
-        self.mlen = [0] # How many coordinates in the previous mesh level (unfiltered)
-        self.mlenUF = [0]
-        self.coordlist = np.zeros(0) # Which coordinates were filtered out
+        self.ncell = 0 # How many cells are there
+        self.mlenUF = [0] # Number of points in unfiltered in each mesh refinement level
         self.cellist = [] # Which cells were filtered out
         self.mins = [] # Min boundaries of a each mesh level
         self.maxs = [] # Max boundaries of a each mesh level
@@ -127,7 +114,7 @@ class DATtoVTK:
             self.feature = feat
             return 1
         else:
-            print("Not an recognised input, may not be implemented. Continuing...")
+            print("Not a recognised input, may not be implemented. Continuing...")
             return 1
     def SetBasePath(path):
         self.BASEPATH = path
@@ -192,6 +179,12 @@ class DATtoVTK:
             return
 
         self.inFilename = self.feature + str(self.outNumber) +"_"+ str(level) + "_" + str(level) + ".dat"
+        
+        try:
+            assert(os.path.isfile(self.dataDir + self.inFilename))
+        except AssertionError:
+            print self.dataDir + self.inFilename + " Does not exist. Please enter a valid filename or filepath."
+            sys.exit(1)
 
 
     # ---------------------------------------------------------------------------------------------
@@ -208,7 +201,7 @@ class DATtoVTK:
             self.SetupNames(i)
             feat = np.fromfile(self.dataDir + self.inFilename, dtype = 'double')  
             if "velocity" in self.feature:
-                data2 = np.zeros(0,dtype = np.float64)
+                data2 = np.array([],dtype = np.float64)
                 data2 = np.append(data2,feat.astype(np.float64))
                 data2 = np.reshape(data2,(3,-1))
                 data3 = np.column_stack((data2[1], data2[0], data2[1]))
@@ -219,11 +212,7 @@ class DATtoVTK:
                     data = data3
             else:
                 # Read in binary doubles into a 1D array
-                #feat = np.fromfile(self.dataDir + self.inFilename, dtype = 'double')
                 data = np.append(data,feat)
-        # Compute all of the indices of cell vertices
-        # Have to do this here to find out which cells
-        # are overlapping, and should not be included
         # Delete overlapping data points       
         data = self.FilterData(data,self.cellist)
         if "velocity" in self.feature:
@@ -284,7 +273,6 @@ class DATtoVTK:
             self.nLevelCoords.append([len(phi[i]),len(r[i]),len(th[i])])
             dsc.close()
         self.unfiltered = self.BuildGrid(phi,r,th)
-        #self.sphere,self.coordlist = self.FilterCoords(phi,r,th)
         self.mesh = self.SphereToCart(self.unfiltered)
         print(str(self.unfiltered.shape[0]) + " Vertices in filtered grid.")
 
@@ -335,7 +323,6 @@ class DATtoVTK:
             print "Something went wrong reading in the coordinates. Please try again."
             sys.exit(1)
         for i in range(len(x1s)):
-            self.nLevelh.append([abs(x1s[i][1]-x1s[i][0]),abs(x2s[i][1]-x2s[i][0]),abs(x3s[i][1]-x3s[i][0])])
             self.mins.append([np.min(x1s[i]),np.min(x2s[i]),np.min(x3s[i])])
             self.maxs.append([np.max(x1s[i]),np.max(x2s[i]),np.max(x3s[i])])
             tg,c = self.BuildOneLevel(x1s[i], x2s[i], x3s[i])
@@ -364,13 +351,13 @@ class DATtoVTK:
             tht = (self.unfiltered[ind[0]][2] + self.unfiltered[ind[6]][2])/2.0
 
             # 0 = az (phi), 1 = rad, 2 = pol (tht)
-            # 0 = pol(tht), 1 = az (phi) 2 = rad
+            # 0 = pol(tht), 1 = az (phi) 2 = rad Use this one, velocity ordering is weird
             xdot = np.cos(tht)*np.cos(phi)*data[i][2] +\
                    rad*np.cos(tht)*np.sin(phi)*data[i][1]+\
                    rad*np.sin(tht)*np.cos(phi)*data[i][0]
             ydot = np.cos(tht)*np.sin(phi)*data[i][2] -\
                    rad*np.cos(tht)*np.cos(phi)*data[i][1] +\
-                   rad*np.sin(tht)*np.cos(phi)*data[i][0]
+                   rad*np.sin(tht)*np.sin(phi)*data[i][0]
             zdot = np.sin(tht)*data[i][2] -\
                    rad*np.cos(tht)*data[i][0]
 
@@ -489,20 +476,13 @@ class DATtoVTK:
                             ls.append(line)
                             self.ncell+=1
                             nn+=1
-
-                            # Check end of line
-                            #if b0x and ((ix+1)%shortx==0):
-                            #    nn += self.nLevelCoords[n][0] - shortx -1
-                            #    break
                             # We made it!                      
                         else:
                             nn += 1
                             id0,id1,id2,id3,id4,id5,id6,id7 = self.ComputeStructuredCell(n,ix,iy,iz,False)  
                             line = np.array([id0,id1,id2,id3,id4,id5,id6,id7])
                             ls.append(line)
-                            self.ncell+=1
-                #sys.exit(1)
-                
+                            self.ncell+=1  
         # Output to terminal, return the list of vertex indices
         print str(self.ncell) + " Cells in the mesh."
         return ls

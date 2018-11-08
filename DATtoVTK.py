@@ -202,26 +202,17 @@ class DATtoVTK:
     # and output for the field in a VTK format. This is the only user facing function.
     # --------------------------------------------------------------------------------------------
     def ConvertFiles( self , binary = True ):
-        data = []
+        inds = self.ComputeIndices()
+        data = np.array([]) 
         for i in range(self.nLevel):
             self.SetupNames(i)
-            #feat = np.fromfile(self.dataDir + self.inFilename, dtype = 'double')
-
+            feat = np.fromfile(self.dataDir + self.inFilename, dtype = 'double')  
             if "velocity" in self.feature:
                 data2 = np.zeros(0,dtype = np.float64)
                 data2 = np.append(data2,feat.astype(np.float64))
-                print self.VEL
-                print data2
                 data2 = np.reshape(data2,(3,-1))
                 data3 = np.column_stack((data2[1], data2[0], data2[1]))
-                data3[:,0] = data2[2]*self.rcgs*np.sin(data2[0])*np.cos(data2[1])
-                data3[:,1] = data2[2]*self.rcgs*np.sin(data2[0])*np.sin(data2[1])
-                data3[:,2] = data2[2]*self.rcgs*np.cos(data2[0])
-                #print data3
-                data3 = data3.transpose() # Velocity ordering is weird.
-                print data3
                 data3 = data3*self.VEL#.value
-                print data3
                 if i > 0:
                     data = np.concatenate((data,data3), axis = 0)
                 else:
@@ -229,21 +220,22 @@ class DATtoVTK:
 
             else:
                 # Read in binary doubles into a 1D array
-                feat = np.fromfile(self.dataDir + self.inFilename, dtype = 'double')
-                data.extend(feat)
-
+                #feat = np.fromfile(self.dataDir + self.inFilename, dtype = 'double')
+                data = np.append(data,feat)
         # Compute all of the indices of cell vertices
         # Have to do this here to find out which cells
         # are overlapping, and should not be included
-        inds = self.ComputeIndices()
-        # Delete overlapping data points
+        # Delete overlapping data points       
         data = self.FilterData(data,self.cellist)
-        # Convert to CGS units
+        if "velocity" in self.feature:
+            data = self.SphereToCartDT(data,inds)
+        # Convert to CGS units 
+        print data.shape
         if("density" in self.feature):
-            data = [x*self.DENS for x in data]#.value
+            data = np.array([x*self.DENS for x in data])#.value
         if("temperature" in self.feature):
-            data = [x*self.TEMP for x in data]#.value
-        print str(len(data)) + " data points for " + self.feature
+            data = np.array([x*self.TEMP for x in data])#.value
+        print str(data.shape[0]) + " data points for " + self.feature
         self.WriteToVTK(data, inds, binary)
 
 
@@ -365,7 +357,28 @@ class DATtoVTK:
         newcoords[:,2] = data[:,1]*self.rcgs*np.cos(data[:,2])
         return newcoords
 
+    def SphereToCartDT(self, data, inds):
+        newcoords = np.zeros(data.shape)
+        i = 0
+        for ind in inds:
+            phi = (self.unfiltered[ind[0]][0] + self.unfiltered[ind[6]][0])/2.0
+            rad = (self.unfiltered[ind[0]][1] + self.unfiltered[ind[6]][1])/2.0 #* self.rcgs
+            tht = (self.unfiltered[ind[0]][2] + self.unfiltered[ind[6]][2])/2.0
 
+            xdot = np.cos(tht)*np.cos(phi)*data[i][2] +\
+                   rad*np.cos(tht)*np.sin(phi)*data[i][1] +\
+                   rad*np.sin(tht)*np.cos(phi)*data[i][0]
+            ydot = np.cos(tht)*np.sin(phi)*data[i][1] -\
+                   rad*np.cos(tht)*np.cos(phi)*data[i][1] +\
+                   rad*np.sin(tht)*np.cos(phi)*data[i][0]
+            zdot = np.sin(tht)*data[i][2] -\
+                   rad*np.cos(tht)*data[i][0]
+
+            newcoords[i][0] = xdot
+            newcoords[i][1] = ydot
+            newcoords[i][2] = zdot
+            i+=1
+        return newcoords
     # --------------------------------------------------
     # WriteToVTK
     # Checks data formatting, prepares output file
@@ -373,7 +386,7 @@ class DATtoVTK:
     def WriteToVTK(self, data, inds, binary = True, append = False):
         # Data quality checking
         try:
-            assert(len(data) == self.ncell)
+            assert(data.shape[0] == self.ncell)
         except ValueError:
             print "Error: Number of data points does not match number of mesh elements"
             return
@@ -629,5 +642,5 @@ class DATtoVTK:
 
     def FilterData(self,data,dels):
         print "Filtering Data"
-        data = np.delete(data,dels)
+        data = np.delete(data,dels,axis = 0)
         return data

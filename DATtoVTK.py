@@ -351,11 +351,11 @@ class DATtoVTK:
 
             # 0 = az (phi), 1 = rad, 2 = pol (tht)
             # 0 = pol(tht), 1 = az (phi) 2 = rad Use this one, velocity ordering is weird
-            xdot = np.cos(phi)*np.sin(tht)*data[i][1] -\
+            xdot = np.cos(phi)*np.sin(tht)*data[i][1] +\
                    rad*np.sin(tht)*np.sin(phi)*data[i][0] +\
                    rad*np.cos(phi)*np.cos(tht)*data[i][2]
-            ydot = -1*np.sin(phi)*np.sin(tht)*data[i][1]-\
-                   rad*np.sin(phi)*np.cos(tht)*data[i][0] -\
+            ydot = np.sin(phi)*np.sin(tht)*data[i][1]-\
+                   rad*np.cos(phi)*np.sin(tht)*data[i][0] +\
                    rad*np.sin(phi)*np.cos(tht)*data[i][2]
             zdot = np.cos(tht)*data[i][1] -\
                    rad*np.sin(tht)*data[i][2]

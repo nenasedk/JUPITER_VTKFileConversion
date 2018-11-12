@@ -39,7 +39,6 @@ import numpy as np
 import astropy.units as u
 import string
 import Dialog
-from multiprocessing import Pool
 
 try:
     from pyvtk import *
@@ -204,7 +203,7 @@ class DATtoVTK:
                 data2 = np.array([],dtype = np.float64)
                 data2 = np.append(data2,feat.astype(np.float64))
                 data2 = np.reshape(data2,(3,-1))
-                data3 = np.column_stack((data2[1], data2[0], data2[1]))
+                data3 = np.column_stack((data2[0], data2[1], data2[2]))
                 data3 = data3*self.VEL#.value
                 if i>0:
                     data = np.concatenate((data,data3), axis = 0)
@@ -345,25 +344,27 @@ class DATtoVTK:
     def SphereToCartDT(self, data, inds):
         newcoords = np.zeros(data.shape)
         i = 0
-        for ind in inds:
-            phi = (self.unfiltered[ind[0]][0] + self.unfiltered[ind[6]][0])/2.0
-            rad = (self.unfiltered[ind[0]][1] + self.unfiltered[ind[6]][1])/2.0 #* self.rcgs
-            tht = (self.unfiltered[ind[0]][2] + self.unfiltered[ind[6]][2])/2.0
+        for ind in inds: 
+            phi = (self.unfiltered[ind[0]][0] + self.unfiltered[ind[0]+1][0])/2.0 # Azimuth
+            rad = (self.unfiltered[ind[0]][1] + self.unfiltered[ind[2]][1])/2.0   # Radial
+            tht = (self.unfiltered[ind[0]][2] + self.unfiltered[ind[4]][2])/2.0   # Polar
 
             # 0 = az (phi), 1 = rad, 2 = pol (tht)
             # 0 = pol(tht), 1 = az (phi) 2 = rad Use this one, velocity ordering is weird
-            xdot = np.cos(tht)*np.cos(phi)*data[i][2] +\
-                   rad*np.cos(tht)*np.sin(phi)*data[i][1]+\
-                   rad*np.sin(tht)*np.cos(phi)*data[i][0]
-            ydot = np.cos(tht)*np.sin(phi)*data[i][2] -\
-                   rad*np.cos(tht)*np.cos(phi)*data[i][1] +\
-                   rad*np.sin(tht)*np.sin(phi)*data[i][0]
-            zdot = np.sin(tht)*data[i][2] -\
-                   rad*np.cos(tht)*data[i][0]
+            xdot = np.cos(phi)*np.sin(tht)*data[i][1] -\
+                   rad*np.sin(tht)*np.sin(phi)*data[i][0] +\
+                   rad*np.cos(phi)*np.cos(tht)*data[i][2]
+            ydot = -1*np.sin(phi)*np.sin(tht)*data[i][1]-\
+                   rad*np.sin(phi)*np.cos(tht)*data[i][0] -\
+                   rad*np.sin(phi)*np.cos(tht)*data[i][2]
+            zdot = np.cos(tht)*data[i][1] -\
+                   rad*np.sin(tht)*data[i][2]
+
 
             newcoords[i][0] = xdot
             newcoords[i][1] = ydot
             newcoords[i][2] = zdot
+
             i+=1
         return newcoords
     # --------------------------------------------------

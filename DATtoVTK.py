@@ -6,6 +6,7 @@
 # This is the class that converts the binary .dat and descriptor files
 # output from JUPITER hydrodynamic simulations into .vtk format.
 #
+
 # The class can be run from the Convert.py script
 #
 # Process:
@@ -37,6 +38,7 @@
 import os,sys
 import numpy as np
 import astropy.units as u
+import astropy.constants as c
 import string
 import Dialog
 
@@ -346,23 +348,76 @@ class DATtoVTK:
         i = 0
         for ind in inds: 
             phi = (self.unfiltered[ind[0]][0] + self.unfiltered[ind[0]+1][0])/2.0 # Azimuth
-            rad = (self.unfiltered[ind[0]][1] + self.unfiltered[ind[2]][1])/2.0   # Radial
+            rad = (self.unfiltered[ind[0]][1] + self.unfiltered[ind[3]][1])/2.0   # Radial
             tht = (self.unfiltered[ind[0]][2] + self.unfiltered[ind[4]][2])/2.0   # Polar
 
             # 0 = az (phi), 1 = rad, 2 = pol (tht)
             # 0 = pol(tht), 1 = az (phi) 2 = rad Use this one, velocity ordering is weird
-            xdot = np.cos(phi)*np.sin(tht)*data[i][0] -\
+
+            xdot = np.sin(phi)*np.sin(tht)*data[i][0]+\
+                   rad*np.cos(phi)*np.sin(tht)*data[i][1] +\
+                   rad*np.sin(phi)*np.cos(tht)*data[i][2]
+            ydot = np.cos(phi)*np.sin(tht)*data[i][0] -\
                    rad*np.sin(phi)*np.sin(tht)*data[i][1] +\
                    rad*np.cos(phi)*np.cos(tht)*data[i][2]
-            ydot = np.sin(phi)*np.sin(tht)*data[i][0]+\
+            zdot = np.cos(tht)*data[i][0] -\
+                   rad*np.sin(tht)*data[i][2]
+            '''
+            ydot = -1*np.cos(phi)*np.sin(tht)*data[i][0]+\
+                   rad*np.sin(phi)*np.sin(tht)*data[i][1] -\
+                   rad*np.cos(phi)*np.cos(tht)*data[i][2]
+            xdot = np.sin(phi)*np.sin(tht)*data[i][0] +\
                    rad*np.cos(phi)*np.sin(tht)*data[i][1] +\
                    rad*np.sin(phi)*np.cos(tht)*data[i][2]
             zdot = np.cos(tht)*data[i][0] -\
                    rad*np.sin(tht)*data[i][2]
+            '''
+            newcoords[i][0] = xdot
+            newcoords[i][1] = -1*ydot
+            newcoords[i][2] = zdot
 
+            i+=1
+        return newcoords
+    def CartToSphere(self, data):
+        newcoords = np.zeros(data.shape)
+        newcoords[:,0] = np.arctan(data[:,1]/data[:,0])
+        newcoords[:,1] = np.sqrt(data[:,0]**2 + data[:,1]**2 + data[:,2]**2)
+        newcoords[:,2] = np.arctan(data[:,2]/newcoords[:,1])
+        return newcoords
 
-            newcoords[i][0] = ydot
-            newcoords[i][1] = -1*xdot
+    def StarCenteredVEL(self, data):
+        newcoords = np.zeros(data.shape)
+        i = 0
+        vp = np.sqrt(c.G * self.mass*u.M_jup.to(u.kg) / (self.radius*u.Au.to(u.m))**3).Value
+        print vp
+        for ind in inds: 
+            phi = (self.unfiltered[ind[0]][0] + self.unfiltered[ind[0]+1][0])/2.0 # Azimuth
+            rad = (self.unfiltered[ind[0]][1] + self.unfiltered[ind[3]][1])/2.0   # Radial
+            tht = (self.unfiltered[ind[0]][2] + self.unfiltered[ind[4]][2])/2.0   # Polar
+
+            # 0 = az (phi), 1 = rad, 2 = pol (tht)
+            # 0 = pol(tht), 1 = az (phi) 2 = rad Use this one, velocity ordering is weird
+
+            xdot = np.sin(phi)*np.sin(tht)*data[i][0]+\
+                   rad*np.cos(phi)*np.sin(tht)*(data[i][1]+vp) +\
+                   rad*np.sin(phi)*np.cos(tht)*data[i][2]
+            ydot = np.cos(phi)*np.sin(tht)*data[i][0] -\
+                   rad*np.sin(phi)*np.sin(tht)*(data[i][1]+vp) +\
+                   rad*np.cos(phi)*np.cos(tht)*data[i][2]
+            zdot = np.cos(tht)*data[i][0] -\
+                   rad*np.sin(tht)*data[i][2]
+            '''
+            ydot = -1*np.cos(phi)*np.sin(tht)*data[i][0]+\
+                   rad*np.sin(phi)*np.sin(tht)*data[i][1] -\
+                   rad*np.cos(phi)*np.cos(tht)*data[i][2]
+            xdot = np.sin(phi)*np.sin(tht)*data[i][0] +\
+                   rad*np.cos(phi)*np.sin(tht)*data[i][1] +\
+                   rad*np.sin(phi)*np.cos(tht)*data[i][2]
+            zdot = np.cos(tht)*data[i][0] -\
+                   rad*np.sin(tht)*data[i][2]
+            '''
+            newcoords[i][0] = xdot
+            newcoords[i][1] = -1*ydot
             newcoords[i][2] = zdot
 
             i+=1
@@ -628,3 +683,4 @@ class DATtoVTK:
         else:
             data =  np.delete(data,dels)
         return data
+    

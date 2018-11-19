@@ -195,7 +195,7 @@ class DATtoVTK:
     # This function wraps the binary .dat file reader for a given feature,
     # and output for the field in a VTK format. This is the only user facing function.
     # --------------------------------------------------------------------------------------------
-    def ConvertFiles( self , binary = True ):
+    def ConvertFiles( self , binary = True , star_centered = False):
         inds = self.ComputeIndices()
         data = np.array([]) 
         for i in range(self.nLevel):
@@ -217,7 +217,10 @@ class DATtoVTK:
         # Delete overlapping data points       
         data = self.FilterData(data,self.cellist)
         if "velocity" in self.feature:
-            data = self.SphereToCartDT(data,inds)
+            if star_centered:
+                data = self.StarCenteredVel(data,inds)
+            else:
+                data = self.PlanetCenteredVel(data,inds)
         # Convert to CGS units 
         if("density" in self.feature):
             data = np.array([x*self.DENS for x in data])#.value
@@ -343,7 +346,7 @@ class DATtoVTK:
         newcoords[:,2] = data[:,1]*self.rcgs*np.cos(data[:,2])
         return newcoords
 
-    def SphereToCartDT(self, data, inds):
+    def PlanetCenteredVel(self, data, inds):
         newcoords = np.zeros(data.shape)
         i = 0
         for ind in inds: 
@@ -385,7 +388,10 @@ class DATtoVTK:
         newcoords[:,2] = np.arctan(data[:,2]/newcoords[:,1])
         return newcoords
 
-    def StarCenteredVEL(self, data):
+    def StarCenteredVel(self, data, inds):
+        '''
+        Assuming circular keplerian orbital velocity for the planet
+        '''
         newcoords = np.zeros(data.shape)
         i = 0
         vp = np.sqrt(c.G * self.mass*u.M_jup.to(u.kg) / (self.radius*u.Au.to(u.m))**3).Value
@@ -406,16 +412,6 @@ class DATtoVTK:
                    rad*np.cos(phi)*np.cos(tht)*data[i][2]
             zdot = np.cos(tht)*data[i][0] -\
                    rad*np.sin(tht)*data[i][2]
-            '''
-            ydot = -1*np.cos(phi)*np.sin(tht)*data[i][0]+\
-                   rad*np.sin(phi)*np.sin(tht)*data[i][1] -\
-                   rad*np.cos(phi)*np.cos(tht)*data[i][2]
-            xdot = np.sin(phi)*np.sin(tht)*data[i][0] +\
-                   rad*np.cos(phi)*np.sin(tht)*data[i][1] +\
-                   rad*np.sin(phi)*np.cos(tht)*data[i][2]
-            zdot = np.cos(tht)*data[i][0] -\
-                   rad*np.sin(tht)*data[i][2]
-            '''
             newcoords[i][0] = xdot
             newcoords[i][1] = -1*ydot
             newcoords[i][2] = zdot

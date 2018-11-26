@@ -130,10 +130,14 @@ class DATtoVTK:
         self.dataOutPath = path
     def SetInFilename(fname):
         self.inFilename = fname
+
+    # Science Set Functions
     def SetRadius(self, rad):
         self.radius = rad*u.AU
         self.rcgs = self.radius.to(u.cm)
         if(self.mass>0. and self.TEMP <0):
+            # 6.67e-8 - cgs G
+            # 8.314e7 - cgs gas constant
             self.TEMP = ((self.rcgs.value)/(np.sqrt((self.rcgs.value)**3 / 6.67259e-8 / (self.mcgs.value))))**2 / 8.314e7
             self.DENS = self.mcgs.value/(self.rcgs.value)**3
             self.PERIOD = 2*np.pi*np.sqrt((self.rcgs.value)**3 / (6.67259e-8 * self.mcgs.value))
@@ -216,7 +220,7 @@ class DATtoVTK:
                 data2 = np.append(data2,feat.astype(np.float64))
                 data2 = np.reshape(data2,(3,-1))
                 data3 = np.column_stack((data2[0], data2[1], data2[2]))
-                data3 = data3#.value
+                data3 = data3
                 if i>0:
                     data = np.concatenate((data,data3), axis = 0)
                 else:
@@ -224,6 +228,7 @@ class DATtoVTK:
             else:
                 # Read in binary doubles into a 1D array
                 data = np.append(data,feat)
+                
         # Delete overlapping data points       
         data = self.FilterData(data,self.cellist)
         if "velocity" in self.feature:
@@ -356,9 +361,32 @@ class DATtoVTK:
         newcoords[:,0] = data[:,1]*self.rcgs*np.sin(data[:,2])*np.cos(data[:,0])
         newcoords[:,1] = data[:,1]*self.rcgs*np.sin(data[:,2])*np.sin(data[:,0])
         newcoords[:,2] = data[:,1]*self.rcgs*np.cos(data[:,2])
+        return newcoords   
+    def CartToSphere(self, data):
+        newcoords = np.zeros(data.shape)
+        newcoords[:,0] = np.arctan(data[:,1]/data[:,0])
+        newcoords[:,1] = np.sqrt(data[:,0]**2 + data[:,1]**2 + data[:,2]**2)
+        newcoords[:,2] = np.arctan(data[:,2]/newcoords[:,1])
         return newcoords
 
+    
     def PlanetCenteredVel(self, data, inds):
+        """ 
+        PlanetCenteredVelocities
+
+        data: the 3D velocity data read in from .dat file
+
+        inds: list of index of each vertex of each mesh cell
+
+        PlanetCenteredVelocities converts the spherical velocities
+        read in from file to a cartesian coordinate system.
+        The orbital velocity of the planet is already subtracted from 
+        the data read in from file.
+
+        Note that the component ordering when reading in from file may change
+        - this is a user adjustable parameter in JUPITER
+        """
+        
         newcoords = np.zeros(data.shape)
         i = 0
         for ind in inds: 
@@ -384,13 +412,6 @@ class DATtoVTK:
 
             i+=1
         return newcoords
-    def CartToSphere(self, data):
-        newcoords = np.zeros(data.shape)
-        newcoords[:,0] = np.arctan(data[:,1]/data[:,0])
-        newcoords[:,1] = np.sqrt(data[:,0]**2 + data[:,1]**2 + data[:,2]**2)
-        newcoords[:,2] = np.arctan(data[:,2]/newcoords[:,1])
-        return newcoords
-
     def StarCenteredVel(self, data, inds):
         '''
         Assuming circular keplerian orbital velocity for the planet
@@ -542,14 +563,22 @@ class DATtoVTK:
         print str(self.ncell) + " Cells in the mesh."
         return ls
 
-    #
-    #  Format data into VTK structure
-    #
+
     def VTKFormatOut(self, data, inds, binary = True, append = False):
         print "Writing to file..."
-        # Write out based on RadMC3D WriteVTK()
-        # and makes use of pyvtk
-        #
+        """
+        Write out based on RadMC3D WriteVTK() function
+        and makes use of vtk package
+
+        data: the scaler or vector hydrodynamic data to be written to file
+              so far velocity is the only vector quantity allowed
+
+        inds: list of the indices of the vertices of each mesh cell
+        
+        binary: should the output file be binary (T) or ascii (F)
+
+        append: should the data be appended to the file or overwrite existing?
+        """
         ncoords = self.mesh.shape[0]
         ncells = self.ncell
         if not append:
@@ -598,7 +627,6 @@ class DATtoVTK:
                     outfile.write('%s\n'%('SCALARS ' + self.feature + ' double'))
                     outfile.write('%s\n'%'LOOKUP_TABLE default')
                     for i in range(self.ncell):
-                        self.printProgressBar(i,self.ncell)
                         outfile.write('%.9e\n'%data[i])
 
                 outfile.close()
@@ -606,6 +634,8 @@ class DATtoVTK:
             else:
                 # ---------------------------------------------------
                 # Binary out, append to file
+                #
+                # FIXME - this probably doesn't work yet.
                 # ---------------------------------------------------
                 print "This probably won't work. Recommend just overwriting or using ascii files."
                 outfile = open(self.dataOutPath + self.outFilename, 'a+')
@@ -631,7 +661,6 @@ class DATtoVTK:
                     outfile.close()
                     outfile = open(self.dataOutPath + self.outFilename, 'ab+')
                     for i in range(ncells):
-                        self.printProgressBar(int(i),self.ncell)
                         data[i].tofile(outfile)
 
                 # Close and exit
@@ -650,30 +679,6 @@ class DATtoVTK:
         s = strings[d.num]
         d.destroy()
         return s
-
-    #
-    # This was nice before I used pyvtk...
-    #
-    def printProgressBar(self, iteration, total, prefix = '', suffix = '', decimals = 0, length = 67, fill = u'\u2588'):
-        """
-        Call in a loop to create terminal progress bar
-        @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
-        length      - Optional  : character length of bar (Int)
-        fill        - Optional  : bar fill character (Str)
-        """
-        str_format = "{0:." + str(decimals) + "f}"
-        percents = str_format.format(100 * (iteration / float(total-1)))
-        filled_length = int(round(length * iteration / float(total-1)))
-        bar = fill * filled_length + '-' * (length - filled_length)
-        sys.stdout.write('\r%s |%s| %s%s %s' % (prefix, bar, percents, '%', suffix))
-        # Print New Line on Complete
-        if iteration == total-1:
-            print('\n')
 
     def FilterData(self,data,dels):
         print "Filtering Data"

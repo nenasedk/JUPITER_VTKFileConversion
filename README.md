@@ -1,8 +1,8 @@
 # JUPITER .dat to .vtk file conversion class
 
-`v2.`
+`v2.1`
 
-Evert Nasedkin, October 10 2018
+Evert Nasedkin, Noveber 26, 2018
 
 This is the class that converts the binary .dat and descriptor files
 output from JUPITER hydrodynamic simulations into .vtk format.
@@ -77,3 +77,8 @@ v2.0
 - Paraview *can* deal with unused grid points, but not with unused cells
 - Therefore, filtering the grid is unneccsary, we can just remove cells with points in the ROI
 - This works, and is much easier and faster.
+
+v2.1
+- Velocity calculations correct
+- Added star centered velocity function
+- Started filling in extra documentation

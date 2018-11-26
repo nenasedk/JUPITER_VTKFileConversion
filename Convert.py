@@ -15,9 +15,10 @@
 import DATtoVTK 
 __CONT__ = True
 BINARY = True # Set to false to write ASCII files
+PATH = ''
 while __CONT__:
     dv = DATtoVTK.DATtoVTK()
-    #dv.setBasePath('') # Uncomment this line if DATtoVTK.py is not located in the directory containing the output folders.
+    dv.setBasePath(PATH) 
     while True:
         userstr = raw_input("Simulation Output number: ")
         try :

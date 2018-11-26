@@ -36,8 +36,10 @@ parser.add_argument('fields',action = 'append', nargs = argparse.REMAINDER,
 args = parser.parse_args()
 
 if args.l is None:
-    args.l = args.o
-    
+    args.l = [args.o[0] + 1]
+if args.b is None:
+    args.b = ['b']
+
 print "Converting outputs from " + str(args.o[0]) + " to " + str(args.l[0])
 print "Using fields " + str(args.fields[0])
 for i in range(args.o[0],args.l[0]):

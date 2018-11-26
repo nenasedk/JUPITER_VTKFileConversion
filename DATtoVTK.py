@@ -57,7 +57,12 @@ except:
     print "Please install vtk package (pip install vtk)"
 
 class DATtoVTK:
-    'Convert JUPITER .DAT files to binary VTK files for Paraview'
+    """
+    Convert JUPITER .DAT files to binary VTK files for Paraview
+    
+    Reads in a Descriptor.dat file and a hydrodynamic field file (.dat)
+    Outputs a vtk formatted file using an unstructured grid
+    """
     def __init__(self):
         # Simulation Information
         self.simNumber = -1 # Which sim output number are we looking at
@@ -82,9 +87,9 @@ class DATtoVTK:
 
         # Science information
         self.radius = -1.
-        self.rcgs = -1.
+        self.rcgs = -1.*u.g
         self.mass = -1.
-        self.mcgs = -1.
+        self.mcgs = -1.*u.g
         # Science Constants
         self.TEMP = -1.
         self.DENS = -1.
@@ -128,10 +133,15 @@ class DATtoVTK:
     def SetRadius(self, rad):
         self.radius = rad*u.AU
         self.rcgs = self.radius.to(u.cm)
+        if(self.mass>0. and self.TEMP <0):
+            self.TEMP = ((self.rcgs.value)/(np.sqrt((self.rcgs.value)**3 / 6.67259e-8 / (self.mcgs.value))))**2 / 8.314e7
+            self.DENS = self.mcgs.value/(self.rcgs.value)**3
+            self.PERIOD = 2*np.pi*np.sqrt((self.rcgs.value)**3 / (6.67259e-8 * self.mcgs.value))
+            self.VEL = self.rcgs.value/(self.PERIOD/2*np.pi)
     def SetMass(self,mass):
         self.mass = mass*u.M_sun
         self.mcgs = self.mass.to(u.g)
-        if(self.rcgs.value>0.):
+        if(self.radius > 0. and self.TEMP < 0):
             self.TEMP = ((self.rcgs.value)/(np.sqrt((self.rcgs.value)**3 / 6.67259e-8 / (self.mcgs.value))))**2 / 8.314e7
             self.DENS = self.mcgs.value/(self.rcgs.value)**3
             self.PERIOD = 2*np.pi*np.sqrt((self.rcgs.value)**3 / (6.67259e-8 * self.mcgs.value))
@@ -206,7 +216,7 @@ class DATtoVTK:
                 data2 = np.append(data2,feat.astype(np.float64))
                 data2 = np.reshape(data2,(3,-1))
                 data3 = np.column_stack((data2[0], data2[1], data2[2]))
-                data3 = data3*self.VEL#.value
+                data3 = data3#.value
                 if i>0:
                     data = np.concatenate((data,data3), axis = 0)
                 else:
@@ -219,9 +229,12 @@ class DATtoVTK:
         if "velocity" in self.feature:
             if star_centered:
                 data = self.StarCenteredVel(data,inds)
+                data = data*self.VEL
             else:
                 data = self.PlanetCenteredVel(data,inds)
-        # Convert to CGS units 
+                data = data*self.VEL
+        # Convert to CGS units
+        
         if("density" in self.feature):
             data = np.array([x*self.DENS for x in data])#.value
         if("temperature" in self.feature):
@@ -240,7 +253,6 @@ class DATtoVTK:
     # cartesian.
     # -------------------------------------------------------
     def GetCoordinates(self):
-
         phi = []
         r = []
         th = []
@@ -353,30 +365,21 @@ class DATtoVTK:
             phi = (self.unfiltered[ind[0]][0] + self.unfiltered[ind[0]+1][0])/2.0 # Azimuth
             rad = (self.unfiltered[ind[0]][1] + self.unfiltered[ind[3]][1])/2.0   # Radial
             tht = (self.unfiltered[ind[0]][2] + self.unfiltered[ind[4]][2])/2.0   # Polar
+            #print i,phi,rad,data[i]
+                        
+            # 0 = az (phi), 1 = rad, 2 = pol (tht)  Use this one, velocity ordering is(n't) weird
+            # 0 = pol(tht), 1 = az (phi) 2 = rad
 
-            # 0 = az (phi), 1 = rad, 2 = pol (tht)
-            # 0 = pol(tht), 1 = az (phi) 2 = rad Use this one, velocity ordering is weird
-
-            xdot = np.sin(phi)*np.sin(tht)*data[i][0]+\
-                   rad*np.cos(phi)*np.sin(tht)*data[i][1] +\
-                   rad*np.sin(phi)*np.cos(tht)*data[i][2]
-            ydot = np.cos(phi)*np.sin(tht)*data[i][0] -\
-                   rad*np.sin(phi)*np.sin(tht)*data[i][1] +\
-                   rad*np.cos(phi)*np.cos(tht)*data[i][2]
-            zdot = np.cos(tht)*data[i][0] -\
+            ydot = np.sin(phi)*np.sin(tht)*data[i][1]+\
+                   rad*np.cos(phi)*data[i][0] +\
+                   rad*np.cos(tht)*data[i][2]
+            xdot = np.cos(phi)*np.sin(tht)*data[i][1] -\
+                   rad*np.sin(phi)*data[i][0] +\
+                   rad*np.cos(tht)*data[i][2]
+            zdot = np.cos(tht)*data[i][1] -\
                    rad*np.sin(tht)*data[i][2]
-            '''
-            ydot = -1*np.cos(phi)*np.sin(tht)*data[i][0]+\
-                   rad*np.sin(phi)*np.sin(tht)*data[i][1] -\
-                   rad*np.cos(phi)*np.cos(tht)*data[i][2]
-            xdot = np.sin(phi)*np.sin(tht)*data[i][0] +\
-                   rad*np.cos(phi)*np.sin(tht)*data[i][1] +\
-                   rad*np.sin(phi)*np.cos(tht)*data[i][2]
-            zdot = np.cos(tht)*data[i][0] -\
-                   rad*np.sin(tht)*data[i][2]
-            '''
             newcoords[i][0] = xdot
-            newcoords[i][1] = -1*ydot
+            newcoords[i][1] = ydot
             newcoords[i][2] = zdot
 
             i+=1
@@ -394,23 +397,23 @@ class DATtoVTK:
         '''
         newcoords = np.zeros(data.shape)
         i = 0
-        vp = np.sqrt(c.G * self.mass*u.M_jup.to(u.kg) / (self.radius*u.Au.to(u.m))**3).Value
+        vp = np.sqrt(c.G * self.mass.to(u.M_jup).to(u.kg) / (self.radius.to(u.m))).value
+        vp = (vp * 100)/(2*np.pi*self.VEL)
         print vp
-        for ind in inds: 
+        for ind in inds:
             phi = (self.unfiltered[ind[0]][0] + self.unfiltered[ind[0]+1][0])/2.0 # Azimuth
             rad = (self.unfiltered[ind[0]][1] + self.unfiltered[ind[3]][1])/2.0   # Radial
             tht = (self.unfiltered[ind[0]][2] + self.unfiltered[ind[4]][2])/2.0   # Polar
 
-            # 0 = az (phi), 1 = rad, 2 = pol (tht)
-            # 0 = pol(tht), 1 = az (phi) 2 = rad Use this one, velocity ordering is weird
-
-            xdot = np.sin(phi)*np.sin(tht)*data[i][0]+\
-                   rad*np.cos(phi)*np.sin(tht)*(data[i][1]+vp) +\
+            # 0 = az (phi), 1 = rad, 2 = pol (tht)  Use this one, velocity ordering is(n't) weird
+            # 0 = pol(tht), 1 = az (phi) 2 = rad
+            xdot = np.sin(phi)*np.sin(tht)*data[i][1]+\
+                   rad*np.cos(phi)*np.sin(tht)*(data[i][0]+vp) +\
                    rad*np.sin(phi)*np.cos(tht)*data[i][2]
-            ydot = np.cos(phi)*np.sin(tht)*data[i][0] -\
-                   rad*np.sin(phi)*np.sin(tht)*(data[i][1]+vp) +\
+            ydot = np.cos(phi)*np.sin(tht)*data[i][1] -\
+                   rad*np.sin(phi)*np.sin(tht)*(data[i][0]+vp) +\
                    rad*np.cos(phi)*np.cos(tht)*data[i][2]
-            zdot = np.cos(tht)*data[i][0] -\
+            zdot = np.cos(tht)*data[i][1] -\
                    rad*np.sin(tht)*data[i][2]
             newcoords[i][0] = xdot
             newcoords[i][1] = -1*ydot

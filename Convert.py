@@ -13,9 +13,9 @@
 # Fixme: add feature so that all gas properties can be written to one vtk file
 
 import DATtoVTK 
-CONT = True
+__CONT__ = True
 BINARY = True # Set to false to write ASCII files
-while CONT:
+while __CONT__:
     dv = DATtoVTK.DATtoVTK()
     #dv.setBasePath('') # Uncomment this line if DATtoVTK.py is not located in the directory containing the output folders.
     while True:
@@ -70,17 +70,16 @@ while CONT:
     dv.SetupDirs()
 
     # Extract mesh and data, output to VTK binary file
-    dv.GetCoordinates()
     dv.ConvertFiles(BINARY) # Can take binary = True/False (defaults to True)
     cont1 = True
     while cont1:
         userstr = raw_input("\nDo you want to convert another file? (y/n)")
         if userstr == 'y':
-            CONT = True
+            __CONT__ = True
             cont1 = False
             print "\n\n\n\n\n"
         elif userstr == 'n':
-            CONT = False
+            __CONT__ = False
             cont1 = False
         else:
             print "Please enter y or n... "

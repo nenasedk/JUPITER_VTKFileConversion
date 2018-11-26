@@ -10,7 +10,7 @@ output from JUPITER hydrodynamic simulations into .vtk format.
 ## REQUIREMENTS:
 * python 2.7 or greater
 * numpy
-* pyvtk `pip install pyvtk`
+* vtk `pip install vtk`
 * astropy (for unit converions)
 
 ## USAGE:

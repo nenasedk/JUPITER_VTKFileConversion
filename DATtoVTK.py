@@ -210,6 +210,7 @@ class DATtoVTK:
     # and output for the field in a VTK format. This is the only user facing function.
     # --------------------------------------------------------------------------------------------
     def ConvertFiles( self , binary = True , star_centered = False):
+        self.GetCoordinates()
         inds = self.ComputeIndices()
         data = np.array([]) 
         for i in range(self.nLevel):
@@ -586,11 +587,11 @@ class DATtoVTK:
                 if "velocity" not in self.feature:
                     vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = inds,),
                                   CellData(Scalars(data,self.feature)),
-                                  name ="JUPITER Sim"+str(self.outNumber)+" "+self.feature+" field")
+                                  name ="JUPITER Sim "+str(self.outNumber)+" "+self.feature+" field")
                 else:
                     vtk = VtkData(UnstructuredGrid(self.mesh,hexahedron = inds,),
                                   CellData(Vectors(data,self.feature)),
-                                  name ="JUPITER Sim"+str(self.outNumber)+" "+self.feature+" field")
+                                  name ="JUPITER Sim "+str(self.outNumber)+" "+self.feature+" field")
                 vtk.tofile(self.dataOutPath + self.outFilename, 'binary')
             else:
                 if "velocity" not in self.feature:

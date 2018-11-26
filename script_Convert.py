@@ -53,7 +53,6 @@ for i in range(args.o[0],args.l[0]):
         else:
             dv.SetBasePath(args.d[0])
             dv.SetupDirs()
-        dv.GetCoordinates()
         if args.b[0] == 'ascii' or args.b[0] == 'a':
             dv.ConvertFiles(False)
         else:

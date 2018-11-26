@@ -121,6 +121,7 @@ class DATtoVTK:
             return 1
         else:
             print("Not a recognised input, may not be implemented. Continuing...")
+            self.feature = feat
             return 1
     def SetBasePath(path):
         self.BASEPATH = path

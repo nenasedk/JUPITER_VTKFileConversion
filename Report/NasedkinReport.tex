@@ -30,6 +30,8 @@
 \usepackage{dsfont}
 \usepackage{listings}
 \usepackage{url}
+\usepackage{tikz}
+\usepackage{natbib}
 \lstset{
 	basicstyle=\ttfamily,
 	mathescape
@@ -154,7 +156,7 @@
 
 \begin{document}
 
-\title{DRAFT 1 Processing JUPITER Hydrodynamics Simulation Data for Visualisation in Paraview DRAFT 1}
+\title{\textcolor{red}{\textbf{DRAFT 1}} Processing JUPITER Hydrodynamics Simulation Data for Visualisation in Paraview \textcolor{red}{\textbf{DRAFT 1}}}
 
 %% LaTeX will automatically break titles if they run longer than
 %% one line. However, you may use \\ to force a line break if
@@ -207,7 +209,7 @@
 \email{evertn@student.ethz.ch}
 
 \author{Evert Nasedkin}
-\affil{ETH Zurich}
+\affil{ETH Zurich, Institute for Particle and Astrophysics}
 
 %% Note that the \and command from previous versions of AASTeX is now
 %% depreciated in this version as it is no longer necessary. AASTeX 
@@ -223,6 +225,9 @@
 
 %% Mark off the abstract in the ``abstract'' environment. 
 \begin{abstract}
+	At the present, no standard procedure exists for visualising the 3D outputs of JUPITER hydrodynamic simulations. Therefore, we have developed a tool that converts the hydrodynamic fields calculated on a nested mesh into a VTK file format which can be visualised using standard open source software.
+	\vspace{2.5em}
+	
 \end{abstract}
 
 %% Keywords should appear after the \end{abstract} command. 
@@ -246,12 +251,12 @@
 %% to the KEY in the \bibitem in the reference list below. 
 
 \section{Introduction} \label{sec:intro}
-This report examines the software developed to process JUPITER hydrodynamic simulation data to allow for visualisation using the open source program Paraview.
-
+This report examines the software developed to process JUPITER hydrodynamic simulation outputs to allow for visualisation using the open source program Paraview \cite{para}.
 \subsection{JUPITER}\label{sec:jup}
-JUPITER is a 3D, nested mesh simulation program that solves the hydrodynamic and radiative transfer equations using a high order Godunov scheme. This allows a spatial resolution of about 0.8 Jupiter radii at the finest mesh level. 
-The radiative transfer is calculated with the method of Commer\c{c}on et al. (2011), with Dirichlet boundary conditions on the boundaries between mesh levels.
-Thus JUPITER solves for mass and momentum conservation, along with total energy, accounting for coupling between thermal  radiative energy ($\epsilon_{rad}$). The governing equations for the program are therefore:
+JUPITER is a 3D, nested mesh, simulation program that solves the hydrodynamic and radiative transfer equations using a high order \cite{MR0119433} scheme described in \cite{Szulagyi2016} \cite{Szulagyi2014} and \cite{DeVal-Borro2006}. 
+This allows a spatial resolution of about 0.8 Jupiter radii at the finest mesh level. 
+The radiative transfer is calculated with the method of \cite{comm2011}, with Dirichlet boundary conditions on the boundaries between mesh levels.
+Thus JUPITER solves for mass and momentum conservation, along with total energy, accounting for coupling between thermal and radiative energy ($\epsilon_{rad}$). The governing equations for the program are therefore as in \cite{Szulagyi2016}:
 \begin{align}\label{eqns:hydro}
 &\frac{\partial\rho}{\partial t} + \nabla \cdot \left(\rho\mathbf{v}\right) = 0\\
 &\frac{\partial\left(\rho\mathbf{v}\right)}{\partial t} + \nabla \cdot \left(\rho\mathbf{v} \otimes \mathbf{v}\right) + \nabla P = -\rho\mathbf{v}\cdot\nabla\Phi + \nabla \cdot \bm{\bar{\tau}}\\
@@ -261,20 +266,20 @@ Thus JUPITER solves for mass and momentum conservation, along with total energy,
 &\frac{\partial \epsilon_{rad}}{\partial t} = -\nabla \cdot F_{rad} + \rho\kappa_{P}c\left(\frac{B\left(T\right)}{c} - \epsilon_{rad}\right)
 \end{align}
 
-The density is given by $\rho$, E is the total gas energy (U + K), $\mathbf{v}$ is the gas velocity, $P$ is pressure, $\Phi$ is the gravitational potential and $T$ is temperature. $\kappa_{P}$ is the Planck opacity from eqn. \ref{eqn:kp} and $B(T)$ is the thermal blackbody radiation power, given by $4\sigma T^{4}$. $c$ is the speed of light and $\sigma$ is the Stephan-Boltzmann constant. $\mathds{1}$ is the identity and $\bm{\bar{\tau}}$ is the stress tensor:
+The density is given by $\rho$, E is the total gas energy (U + K), $\mathbf{v}$ is the gas velocity, $P$ is pressure, $\Phi$ is the gravitational potential and $T$ is temperature. $\kappa_{P}$ is the Planck opacity from Eqn. \ref{eqn:kp} and $B(T)$ is the thermal blackbody radiation power, given by $4\sigma T^{4}$. $c$ is the speed of light and $\sigma$ is the Stephan-Boltzmann constant. $\mathds{1}$ is the identity tensor and $\bm{\bar{\tau}}$ is the stress tensor:
 \begin{equation}
 \bm{\bar{\tau}} = 2\rho\nu\left(\bm{\bar{D}} - \frac{1}{3}\left(\nabla\cdot\mathbf{v}\right)\mathds{1}\right)
 \end{equation}
-
-The Planck Opacity is defined as 
+where $\nu$ is the kinematic velocity and $\mathds{\bar{D}}$ is the strain tensor. 
+The Planck Opacity is defined as in \cite{Bitsch2013}:
 \begin{equation}\label{eqn:kp}
 \kappa_{P} = \frac{\int_{0}^{\infty}\kappa_{\nu}B_{\nu}\left(T\right)d\nu}{\int_{0}^{\infty}B_{\nu}\left(T\right)d\nu}
 \end{equation}
-where $\nu$ is the kinematic velocity and $\mathds{\bar{D}}$ is the strain tensor. Finally $F_{rad}$ is given by:
+Finally $F_{rad}$ is given by:
 \begin{equation}
 F_{rad} = -\frac{c\lambda}{\rho\kappa_{R}}\nabla\epsilon_{rad}
 \end{equation}
-$\kappa_{R}$ is the Rosseland mean opacity, and $\lambda$ is a flux limiter to smooth the transition between optically thick and thin regions.
+$\kappa_{R}$ is the Rosseland mean opacity, and $\lambda$ is a flux limiter to smooth the transition between optically thick and thin regions, also defined in \cite{Bitsch2013}.
 
 The equation of state of the system is taken to be 
 \begin{equation}
@@ -282,12 +287,12 @@ P = \left(\gamma - 1\right)\epsilon
 \end{equation}
 where $\epsilon = \rho c_{v}T$ and the adiabatic index $\gamma = 1.43$.
 
-JUPITER can then be supplied with a given set of initial conditions and system properties, and will calculate each of the hydrodynamic fields at each time step to explore planet-disk interactions and related physics.
+JUPITER can then be supplied with a given set of initial conditions and system properties, and will calculate each of the hydrodynamic fields at each time step to explore planet-disk interactions and related physics. These must then be further processed for visualisation and study.
 \subsection{Adaptive Mesh Refinement}\label{sec:amr}
 \textcolor{red}{TALK TO JUDIT TO MAKE SURE THIS SECTION IS CORRECT}
 
 The nested mesh system used in JUPITER is an example of adaptive mesh refinement (AMR) techniques. 
-In general, AMR improves computational speed for a given maximum resolution, as it reduces the number of mesh elements in the grid while maintaining the high resolution in the region of interest as seen in fig. \ref{fig:mesh}. 
+In general, AMR improves computational speed for a given maximum resolution, as it reduces the number of mesh elements in the grid while maintaining the high resolution in the region of interest as seen in Fig. \ref{fig:mesh}. 
 In JUPITER, the mesh is not truly adaptive, as the refinement regions are predefined in the region of the planet embedded in the circumstellar disk.
 Other AMR techniques could refine the mesh only in regions of steep density or velocity gradients. 
 However, as circumstellar are not a static-flow environment, the location of these gradients changes over time, and it would be difficult to manage a constantly changing grid. 
@@ -301,10 +306,10 @@ This is iterated for each mesh refinement level, with the edge length in each di
 	\caption{\label{fig:mesh}Nested mesh levels around the location of the planet from a JUPITER simulation.}
 \end{figure}
 \subsection{Outputs}\label{sec:out}
-As JUPITER relies on parallel computation, each core will output the hydrodynamic fields in its mesh region. These can be stitched together to create output files for each hydrodynamic field over the whole disk.
+As JUPITER relies on parallel computation, each computational core will output the hydrodynamic fields in its mesh region. These can be stitched together to create output files for each hydrodynamic field over the whole disk.
 
 The first output file is a descriptor file that provides simulation properties, along with the positions in spherical coordinates of each of the vertices of the mesh for each mesh level. 
-For this report $phi$ represents the azimuthal angle, and $theta$ the polar angle from the z-axis, and coordinates are generally ordered ($\phi$, $r$, $\theta$). 
+For this report $\phi$ represents the azimuthal angle, and $\theta$ the polar angle from the z-axis, and coordinates are generally ordered ($\phi$, $r$, $\theta$). 
 The file is structured as follows:
 \textcolor{red}{TALK TO JUDIT ABOUT WHAT ELSE IS IN THE DESCRIPTOR FILE}
 \begin{lstlisting}
@@ -320,15 +325,15 @@ The file is structured as follows:
 [$r$ axis]
 [$\theta$ axis]
 \end{lstlisting}
-This structure is then repeated sequentially for each mesh refinement level, from coarse to fine. The first and last two components of each axis are ghost cells, and should not be read in. The number of components along each axis (e.g. $N_{\phi}$) takes this accounts for this, however it assumes zero index counting. Thus if there are 681 $\phi$ components, the descriptor file will read 680, and the total axis in the file will contain 685 elements.
+This structure is then repeated sequentially for each mesh refinement level, from coarse to fine. The first and last two components of each axis are ghost cells, and should not be read in. The number of components along each axis (e.g. $N_{\phi}$) takes this accounts for this, however it assumes zero index counting. Thus if there are $n$ $\phi$ components, the descriptor file will read $n-1$, and the total $\phi$ axis in the file will contain $n+4$ elements.
 
 Each hydrodynamic field is stored in a data file, with a data point for each cell of the mesh. Note that while the descriptor file stores the locations of the vertices of the cells, all of the field data is defined at the barycentre of a given cell. The data is stored as binary doubles, and is ordered such that for a given coordinates ($\phi_{i}$, $r_{j}$, $\theta_{k}$), $i$ is iterated the fastest and $k$ the slowest. For vector data (velocities), each component of the vector is ordered as a scaler, with the azimuthal velocity listed first in its entirety, followed by the radial component, followed by the polar component. This ordering is also user adjustable in JUPITER, and may change. All data is stored in code units, and must be converted to physical units after read in.
 
 Many of these hydrodynamic fields cannot be processed for visualisation with existing software (e.g. RadMC3D), so a conversion tool was necessary to allow for visualisation in Paraview.
 \section{Processing Tools}\label{sec:code}
-All of the tools described on this section are available on Github: \url{https://github.com/nenasedk/JUPITER_VTKFileConversion}
+All of the tools described on this section are available on Github: \url{https://github.com/nenasedk/JUPITER_VTKFileConversion}. 
 \subsection{VTK File Structure}\label{sec:vtk}
-Paraview uses the VTK file format to store data for visualisation. While a modern xml format exists, the legacy format is simpler to use and has much more extensive documentation, and was thus chosen for this project. Future work could explore the usage of a VTK format developed for adaptive mesh grids.
+Paraview uses the VTK file format to store data for visualisation. This section describes the format as in \cite{Formats2009}. While a modern XML format exists, the legacy format is simpler to use and has much more extensive documentation, and was thus chosen for this project. Future work could explore the usage of a VTK format developed for adaptive mesh grids.
 
 The legacy VTK format is structured into 5 parts:
 \begin{enumerate}
@@ -339,9 +344,9 @@ The legacy VTK format is structured into 5 parts:
 	\item Dataset structure. This describes the geometry and topology of the dataset, and consists of the word \verb|DATASET| followed by a keyword description of the data. We use an Unstructured Grid to describe the data.
 	An unstructured grid requires both a list of coordinates and a list of connections to fully specify the locations and connections of each cell in the grid.
 	
-	Following the keyword is the list of coordinates used to describe the data. This initiated by line \verb|POINTS n datatype|, where n is the number of coordinates and datatype is a C type (we use doubles). The JUPITER coordinate grid is listed in order $\phi$, $r$, $\theta$, with $\phi$ iterating the fastest and $\theta$ the slowest. Each coordinate vector is converted to a Cartesian grid before being written to file, so the VTK file will contain the x,y,z components of each vertex in the mesh in CGS units, centred on the star. Each mesh level is appended subsequently from coarsest to finest.
+	Following the keyword is the list of coordinates used to describe the data. This initiated by line \verb|POINTS n datatype|, where n is the number of coordinates and datatype is a C type (we use doubles). The JUPITER coordinate grid is listed in order $\phi$, $r$, $\theta$, with $\phi$ iterating the fastest and $\theta$ the slowest. Each coordinate vector is converted to a Cartesian grid before being written to file, so the VTK file will contain the x,y,z components of each vertex in the mesh in CGS units, centred on the star. Each mesh level is appended subsequently from coarsest to finest. 
 	
-	After the list of coordinates, the cells are listed. This section begins with the line \verb|CELLS m| where m is the number of cells. Each row begins with the number of vertices of the cell, followed by the index of the coordinates of each vertex of the cell. We use a hexahedral cell type (cell type 8), and a description of the algorithm to compute the indices is found in sec. \ref{sec:code}. 
+	After the list of coordinates, the cells are listed. This section begins with the line \verb|CELLS m| where m is the number of cells. Each row begins with the number of vertices of the cell, followed by the index of the coordinates of each vertex of the cell. We use a hexahedral cell type (cell type 8), and a description of the algorithm to compute the indices is found in Sec. \ref{sec:code}. Although the JUPITER grid is based in spherical coordinates, for a small enough grid size a Cartesian grid with hexahedral cells provides a `close-enough' approximation for practical purposes.
 	
 	Following the list of cells is the list of cell types for each cell. This is started by the line \verb|CELL_TYPES m| where m is the number of cells. All of the cells used in JUPITER are hexahedral (type 12).
 	\item Dataset attributes. This can be either \verb|POINT_DATA|, where each datapoint is located at a mesh vertex, or \verb|CELL_DATA|, where each datapoint is located at the centre of a cell. All JUPITER hydro fields are \verb|CELL_DATA|. Additionally, each datapoint can be either a \verb|SCALAR| or \verb|VECTOR|, the latter of which is used to store velocities.
@@ -350,19 +355,15 @@ An example file is included in Appendix A.
 \subsection{Data Processing Methods}\label{sec:code}
 \textbf{Requirements}
 
-To run the python conversion script the user must have installed at minimum:
-\begin{itemize}
-	\item Python 2.7 or greater
-	\item numpy package
-	\item astropy package
-	\item vtk package v8.1.1
-\end{itemize}
+To run the python conversion script the user must have installed at minimum: Python 2.7 or greater, numpy, astropy and the python VTK package v8.1.1.
 
 \textbf{Overview}
 
-To process the outputs of the JUPITER simulations into the VTK fileformat, a python class was written. 
+To process the outputs of the JUPITER simulations into the VTK file format, a python class was written. 
 The class has a range of user settable functions, allowing the user to write a script to wrap the class for a given conversion job, or use the interactive command line interface written for the class.
 In general, the user must provide the input and output directories, the output number, the number of mesh refinement levels, the hydrodynamic field to convert, the orbital radius of the planet in AU and the mass of the star in solar masses.
+
+The other primary requirement of the tool was to be at most of O(n) time complexity, as the mesh can contain millions of elements. This restricts which algorithms can be used throughout the program.
 
 The program flow is as follows:
 \begin{enumerate}
@@ -371,20 +372,43 @@ The program flow is as follows:
 	\item For each mesh level, define the boundaries of the next finest level. Cells (NOT grid points) within this region of interest (ROI) will be ignored.
 	\item Compute the indices of each vertex of each cell. This is achieved using a stride calculation in the \verb|ComputeStructuredCell()| function:	
 	\begin{itemize}
-		 \item Label the indices from 0 to 7, counter clockwise and from bottom to top. Thus the 'bottom' level of each hexahedral cell consists of indices 0-3, the top from 4-7, with index 4 directly above index 0.
-		 \item The axis are iterated $phi$ fastest and $\theta$ slowest. Therefore index 1 will be one greater, but index 3 will be a full $\phi$ axis farther along than index 0. Likewise, index 4 will be an $r-\phi$ plane greater than index 0.
+		 \item Label the indices from 0 to 7, counter clockwise and from bottom to top as shown in Fig. \ref{fig:cube}.
+		 \item The $\phi$ axis is iterated fastest and $\theta$ the slowest. Therefore index 1 will be one greater, but index 3 will be a full $\phi$ axis farther along than index 0. Likewise, index 4 will be an $r-\phi$ plane greater than index 0.
 		 \item Iterate through each axis, incrementing the counters. Any cells with one or more vertices within the ROI will be skipped, but their index in the total list of cells is stored.
  	\end{itemize}
 	\item Read in the data from the descriptor file, reshaping vector (velocity) data as necessary. Remove the datapoints with the indices of the removed cells.
 	\item Write the data to a binary or ascii VTK file. If the output file already exists, the user can choose to overwrite the file, or append new data to the existing file.
 \end{enumerate}
-
+\begin{figure}[t]
+	\centering
+\begin{tikzpicture}
+\foreach \n/\x/\l/\p in{
+	1/{( 0  , 0)}/{$0$}/below,
+	2/{( 3, 0)}/{$1$}/below,
+	3/{( .8, 1)}/{$3$}/south east,
+	4/{( 3.8, 1)}/{$2$}/right,
+	5/{( 0, 3)}/{$4$}/left,
+	6/{( 3, 3)}/{$5$}/south west,
+	7/{( 0.8, 3.8)}/{$7$}/above,
+	8/{( 3.8, 3.8)}/{$6$}/above
+}
+{
+	\node[inner sep=2pt,circle,draw,fill,label={\p:\l}] (\n) at \x {};
+}
+\draw (1) -- (2) -- (6) -- (5) -- (1);
+\draw (5) -- (6) -- (8) -- (7) -- (5);
+\draw (2) -- (4) -- (8) -- (6) -- (2);
+\draw[dashed] (1) -- (3) -- (4);
+\draw[dashed] (3) -- (7);
+\end{tikzpicture}
+\caption{\label{fig:cube} Labelling of hexahedral cell indices.}
+\end{figure}
 \textbf{Usage}
 
-To use the command line interface simply use \verb|python Convert.py|
-Within the Convert.py script, the user can change whether to output to a binary or ascii VTK file, as well as the location of the input data from JUPITER. This data must be in a folder labelled output, and the default path to this directory is to use the current working directory.
+To use the command line interface simply use \verb|python Convert.py|.
+Within the Convert.py script, the user can change whether to output to a binary or ascii VTK file, as well as the location of the input data from JUPITER. This data must be in a folder labelled outputXXXXX where the X's denote the simulation output number with leading zeros. The default path to this directory is the current working directory.
 
-A second interface has been developed to allow for easier scripting of inputs. To use this, use:
+A second interface has been developed to allow for easier bash scripting. To use this, enter the following into the command line or a bash script:
 \verb|python script_convert.py [first] [grid level]\ | \newline \verb|[radius] [mass] -l [last] -b [binary/ascii] -d\ |\newline\verb|[dir] [field list]|
 
 Or without all optional tagged arguments:\newline
@@ -397,24 +421,45 @@ Tagged arguments can be placed in any order, but the field list must be the last
 	\item \verb|[grid_level]| The mesh refinement level.
 	\item \verb|[radius]| The orbital radius of the planet in AU.
 	\item \verb|[mass]| The mass of the star in solar masses.
-	\item \verb|[-b binary/ascii]| A string (b)inary or (a)scii to set the output file type. Binary is recommended.
-	\item \verb|[-d dir]| Directory where the output folder from JUPITER is located
+	\item \verb|-b [binary/ascii]| A string (b)inary or (a)scii to set the output file type. Binary is recommended.
+	\item \verb|-d [dir]| Directory where the output folder from JUPITER is located
 	\item \verb|[field_list]| A list of space separated strings denoting which hydro fields should be converted.
 \end{itemize}
 \section{Results}\label{sec:res}
 \begin{figure}
 	\centering
-	\includegraphics[width=0.9\linewidth]{figures/Dens5YCut0Zoom.png}
+	\includegraphics[width=0.95\linewidth]{figures/Dens5YCut0Zoom.png}
 	\caption{\label{fig:dens} Cross section of gas density of the circumplanetary disk of a planet embedded at 50 AU in the circumstellar disk of a 1 solar mass star.}
+	\includegraphics[width=0.9\linewidth]{figures/DensityStructure3D.png}
+	\caption{\label{fig:d3d} 3D density structure of the circumplanetary disk.}
 \end{figure}
+With the conversion tool developed, we can present several examples of possibile visualisations made using Paraview \cite{para}. Fig. \ref{fig:dens} shows a cross section of the gas density in the region of the circumplanetary disk along with the 3D density structure in Fig. \ref{fig:d3d}. Fig. \ref{fig:temp} shows the gas temperature of the midplane of the disk, coloured to a blackbody spectrum. Fig. \ref{fig:vel} shows the gas velocity in the circumplanetary disk, showing that the gas is spiralling away from the planet. Fig. \ref{ref:energy} shows the increase in internal energy of the gas near the planet as it is adiabatically compressed.
+
+More complicated renders -- particularly when rendering 3D volumes -- are very computationally expensive, and it is recommended to set up a ParaView server dedicated to rendering the dataset.
+Other possibilities include 3D time series animates, image generation using python scripts, streamline and flow visualisation and more.
 \begin{figure}
 	\centering
-	\includegraphics[width=0.9\linewidth]{figures/Temp/GasTempMidplane.png}
+	\includegraphics[width=0.95\linewidth]{figures/Temp/GasTempMidplane.png}
 	\caption{\label{fig:temp} Temperature of the midplane of the circumstellar disk.}
+
+	\centering
+	\includegraphics[width=0.95\linewidth]{figures/VelGlyphs/VelGlyphs5Circumplanetary.png}
+	\caption{\label{fig:vel}Velocity vectors spiralling out from the circumplanetary disk.}
+\end{figure}
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=0.9\linewidth]{figures/GasEnergy1.png}
+	\caption{\label{ref:energy}Total internal energy of the gas near the planet.}
 \end{figure}
 \section{Conclusions}\label{sec:con}
+We have successfully developed a data processing tool to allow JUPITER simulations results to be visualised using ParaView or other VTK software. This will allow further exploration of the physics of circumstellar and circumplanetary disks, as the increasingly complex 3D results require adequate visualisation to understand and study. 
 \section{Acknowledgements}
+I would like to sincerely thank my supervisor Dr. Judit Szul\'{a}gyi for her guidance, mentorship and patience during this project.
 
+I would also like to acknowledge the Kitware Inc. for supporting the open source platforms of the Visualization ToolKit (VTK)  and Paraview, upon which this work relies.
+
+ 
 
 %% The reference list follows the main body and any appendices.
 %% Use LaTeX's thebibliography environment to mark up your reference list.
@@ -441,24 +486,13 @@ Tagged arguments can be placed in any order, but the field list must be the last
 %% delimit the year from the author name used in the citation.
 %% See the natbib documentation for more details and options.
 
-\begin{thebibliography}{}
+\bibpunct{(}{)}{;}{a}{}{,} % to follow the A&A style
+\bibliographystyle{aasjournal}
+\bibliography{biblio.bib}
 
-\bibitem[Astropy Collaboration et al.(2013)]{2013A&A...558A..33A} Astropy Collaboration, Robitaille, T.~P., Tollerud, E.~J., et al.\ 2013, \aap, 558, A33 
-\bibitem[Bertin \& Arnouts(1996)]{1996A&AS..117..393B} Bertin, E., \& Arnouts, S.\ 1996, \aaps, 117, 393 
-\bibitem[Corrales(2015)]{2015ApJ...805...23C} Corrales, L.\ 2015, \apj, 805, 23
-\bibitem[Ferland et al.(2013)]{2013RMxAA..49..137F} Ferland, G.~J., Porter, R.~L., van Hoof, P.~A.~M., et al.\ 2013, \rmxaa, 49, 137
-\bibitem[Hanisch \& Biemesderfer(1989)]{1989BAAS...21..780H} Hanisch, R.~J., \& Biemesderfer, C.~D.\ 1989, \baas, 21, 780 
-\bibitem[Lamport(1994)]{lamport94} Lamport, L. 1994, LaTeX: A Document Preparation System, 2nd Edition (Boston, Addison-Wesley Professional)
-\bibitem[Schwarz et al.(2011)]{2011ApJS..197...31S} Schwarz, G.~J., Ness, J.-U., Osborne, J.~P., et al.\ 2011, \apjs, 197, 31  
-\bibitem[Vogt et al.(2014)]{2014ApJ...793..127V} Vogt, F.~P.~A., Dopita, M.~A., Kewley, L.~J., et al.\ 2014, \apj, 793, 127  
-%Szul´agyi,\ J., PhD thesis: “Gas accretion onto Jupitermass
-%Planets”, 2015, https://people.phys.ethz.ch/ judits/thesisszulagyi.pdf
-\end{thebibliography}
-\newpage
-
-
-\section*{Appendix A}
-An example of a simple VTK file:
+\begin{appendix}
+\section{Legacy VTK File Format}
+An example of a simple VTK file \cite{Formats2009}:
 \begin{lstlisting}
 # vtk DataFile Version 2.0
 Jupiter Simulation Data
@@ -470,7 +504,7 @@ p$_{0x}$ p$_{0y}$ p$_{0z}$
 p$_{(n-1)x}$ p$_{(n-1)y}$ p$_{(n-1)z}$
 
 CELLS m 
-nVert$_{0}$ i0 i1 i2 ... i()nVert$_{0}$-1)
+nVert$_{0}$ i0 i1 i2 ... i(nVert$_{0}$-1)
 ...
 nVert$_{(m-1)}$ i0 i1 i2 ... i(nVert$_{(m-1)}$-1)
 
@@ -486,7 +520,7 @@ s$_{0}$
 ...
 s$_{(m-1)}$
 \end{lstlisting}
-
+\end{appendix}
 %% This command is needed to show the entire author+affilation list when
 %% the collaboration and author truncation commands are used.  It has to
 %% go at the end of the manuscript.

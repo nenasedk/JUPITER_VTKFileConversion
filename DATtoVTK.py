@@ -95,7 +95,7 @@ class DATtoVTK:
         self.DENS = -1.
         self.PERIOD = -1.
         self.VEL = -1.
-
+        self.units = "CGS"
         # Grid Information
         self.mesh = np.zeros((0,0,3),dtype=np.float64)   # 3D cartesian array - edges
         self.unfiltered = self.mesh = np.zeros((0,0,3),dtype=np.float64) # Unfiltered spherical coords
@@ -123,35 +123,50 @@ class DATtoVTK:
             print("Not a recognised input, may not be implemented. Continuing...")
             self.feature = feat
             return 1
-    def SetBasePath(path):
+    def SetBasePath(self,path):
         self.BASEPATH = path
-    def SetInDir(path):
+    def SetInDir(self,path):
         self.dataDir = path
-    def SetOutDir(path):
+    def SetOutDir(self,path):
         self.dataOutPath = path
-    def SetInFilename(fname):
+    def SetInFilename(self,fname):
         self.inFilename = fname
 
+    def SetUnits(units):
+        ulist = ["CGS","cgs","AU","Au","au"]
+        if units is in ulist:
+            self.units = units
+        else:
+            print "Please select a valid unit system."
+        return
     # Science Set Functions
     def SetRadius(self, rad):
         self.radius = rad*u.AU
         self.rcgs = self.radius.to(u.cm)
         if(self.mass>0. and self.TEMP <0):
-            # 6.67e-8 - cgs G
-            # 8.314e7 - cgs gas constant
-            self.TEMP = ((self.rcgs.value)/(np.sqrt((self.rcgs.value)**3 / 6.67259e-8 / (self.mcgs.value))))**2 / 8.314e7
-            self.DENS = self.mcgs.value/(self.rcgs.value)**3
-            self.PERIOD = 2*np.pi*np.sqrt((self.rcgs.value)**3 / (6.67259e-8 * self.mcgs.value))
-            self.VEL = self.rcgs.value/(self.PERIOD/2*np.pi)
+            self.SetConstants(self.units)
+
     def SetMass(self,mass):
         self.mass = mass*u.M_sun
         self.mcgs = self.mass.to(u.g)
         if(self.radius > 0. and self.TEMP < 0):
+            self.SetConstants(self.units)
+
+    def SetConstants(self,units):
+        # 6.67e-8 - cgs G
+        # 8.314e7 - cgs gas constant
+        if units == "AU" or units == "Au" or units == "au":
+            self.TEMP = ((self.rcgs.value)/(np.sqrt((self.rcgs.value)**3 / 6.67259e-8 / (self.mcgs.value))))**2 / 8.314e7
+            self.DENS = self.mass/(self.radius)**3
+            self.PERIOD = 2*np.pi*np.sqrt((self.rcgs.value)**3 / (6.67259e-8 * self.mcgs.value))
+            self.VEL = self.radius/(self.PERIOD/2*np.pi)
+            self.rcgs = self.radius
+            self.mcgs = self.mass
+        else:    
             self.TEMP = ((self.rcgs.value)/(np.sqrt((self.rcgs.value)**3 / 6.67259e-8 / (self.mcgs.value))))**2 / 8.314e7
             self.DENS = self.mcgs.value/(self.rcgs.value)**3
             self.PERIOD = 2*np.pi*np.sqrt((self.rcgs.value)**3 / (6.67259e-8 * self.mcgs.value))
             self.VEL = self.rcgs.value/(self.PERIOD/2*np.pi)
-
     # ----------------------------------------------------------------------------------------
 
     # Directory and file Setup

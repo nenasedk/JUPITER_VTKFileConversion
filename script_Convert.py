@@ -4,7 +4,7 @@
 # python script_convert.py [first] [grid_level] [radius] [mass] -f [field list]
 #
 # with optional arguments:
-# python script_convert.py [first] [grid level] [radius] [mass] -l [last] -b [binary/ascii] -d [dir] -f [field list]
+# python script_convert.py [first] [grid level] [radius] [mass] -l [last] [-v] -b [binary/ascii] -d [dir] -f [field list]
 #
 # The list of fields must always be the final argument. 
 import DATtoVTK
@@ -31,17 +31,21 @@ parser.add_argument('-d',"--directory",action = 'store', nargs = 1,
                     help= "Directory to output folders")
 parser.add_argument('-b',action = 'store', nargs = 1, metavar = 'binary', required = False,
                     help= '(b)inary or (a)scii')
+parser.add_argument('-v', action = 'store_true',required = False,
+                    help= 'Planet centred vels if included')
 parser.add_argument('-f','--fields',action = 'append', nargs = argparse.REMAINDER,
                     help= 'list of hydrodynamic fields to convert',
 	   	    required = True)
 
+PVEL = False
 args = parser.parse_args()
 
 if args.last is None:
     args.last = [args.o[0]]
 if args.b is None:
     args.b = ['b']
-
+if args.v is not None:
+    PVEL = True
 print "Converting outputs from " + str(args.o[0]) + " to " + str(args.last[0])
 print "Using fields " + str(args.fields[0])
 print args.directory[0]
@@ -59,7 +63,7 @@ for i in range(args.o[0],args.last[0]+1):
             dv.SetBasePath(args.directory[0])
             dv.SetupDirs()
         if args.b[0] == 'ascii' or args.b[0] == 'a':
-            dv.ConvertFiles(False)
+            dv.ConvertFiles(False,PVEL)
         else:
-            dv.ConvertFiles(True)    
+            dv.ConvertFiles(True,PVEL)    
 

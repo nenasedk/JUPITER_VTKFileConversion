@@ -134,19 +134,25 @@ class DATtoVTK:
 
     def SetUnits(units):
         ulist = ["CGS","cgs","AU","Au","au"]
-        if units is in ulist:
+        if units in ulist:
             self.units = units
         else:
             print "Please select a valid unit system."
         return
     # Science Set Functions
     def SetRadius(self, rad):
+        """
+        Orbital radius of companion
+        """
         self.radius = rad*u.AU
         self.rcgs = self.radius.to(u.cm)
         if(self.mass>0. and self.TEMP <0):
             self.SetConstants(self.units)
 
     def SetMass(self,mass):
+        """
+        Mass of star in solar masses
+        """
         self.mass = mass*u.M_sun
         self.mcgs = self.mass.to(u.g)
         if(self.radius > 0. and self.TEMP < 0):
@@ -225,7 +231,7 @@ class DATtoVTK:
     # This function wraps the binary .dat file reader for a given feature,
     # and output for the field in a VTK format. This is the only user facing function.
     # --------------------------------------------------------------------------------------------
-    def ConvertFiles( self , binary = True , star_centered = False):
+    def ConvertFiles( self , binary = True , planet_centered = True):
         self.GetCoordinates()
         inds = self.ComputeIndices()
         data = np.array([]) 
@@ -249,11 +255,11 @@ class DATtoVTK:
         # Delete overlapping data points       
         data = self.FilterData(data,self.cellist)
         if "velocity" in self.feature:
-            if star_centered:
-                data = self.StarCenteredVel(data,inds)
+            if planet_centered:
+                data = self.PlanetCenteredVel(data,inds)
                 data = data*self.VEL
             else:
-                data = self.PlanetCenteredVel(data,inds)
+                data = self.StarCenteredVel(data,inds)
                 data = data*self.VEL
         # Convert to CGS units
         
@@ -375,9 +381,9 @@ class DATtoVTK:
     # -----------------------------------------------------
     def SphereToCart(self, data):
         newcoords = np.zeros(data.shape)
-        newcoords[:,0] = data[:,1]*self.rcgs*np.sin(data[:,2])*np.cos(data[:,0])
-        newcoords[:,1] = data[:,1]*self.rcgs*np.sin(data[:,2])*np.sin(data[:,0])
-        newcoords[:,2] = data[:,1]*self.rcgs*np.cos(data[:,2])
+        newcoords[:,0] = data[:,1]*self.rcgs.value*np.sin(data[:,2])*np.cos(data[:,0])
+        newcoords[:,1] = data[:,1]*self.rcgs.value*np.sin(data[:,2])*np.sin(data[:,0])
+        newcoords[:,2] = data[:,1]*self.rcgs.value*np.cos(data[:,2])
         return newcoords   
     def CartToSphere(self, data):
         newcoords = np.zeros(data.shape)
@@ -407,14 +413,23 @@ class DATtoVTK:
         newcoords = np.zeros(data.shape)
         i = 0
         for ind in inds: 
-            phi = (self.unfiltered[ind[0]][0] + self.unfiltered[ind[0]+1][0])/2.0 # Azimuth
-            rad = (self.unfiltered[ind[0]][1] + self.unfiltered[ind[3]][1])/2.0   # Radial
-            tht = (self.unfiltered[ind[0]][2] + self.unfiltered[ind[4]][2])/2.0   # Polar
-            #print i,phi,rad,data[i]
-                        
+            x = (self.mesh[ind[0]][0] + self.mesh[ind[0]+1][0])/2.0 # Azimuth
+            y = (self.mesh[ind[0]][1] + self.mesh[ind[3]][1])/2.0   # Radial
+            z = (self.mesh[ind[0]][2] + self.mesh[ind[4]][2])/2.0   # Polar
+
+            # Shift to planet centered reference frame
+            x = x - self.rcgs.value
+            sph = self.CartToSphere(np.array([[x,y,z]/self.rcgs.value]))
+
+            # So I don't have to change any of the rest of the math
+            phi = sph[0][0]
+            rad = sph[0][1]
+            tht = sph[0][2]
+            
             # 0 = az (phi), 1 = rad, 2 = pol (tht)  Use this one, velocity ordering is(n't) weird
             # 0 = pol(tht), 1 = az (phi) 2 = rad
 
+            # Using the coordinate conversion from RADMC3D - note no sin/cos theta dependance for x,y vel
             ydot = np.sin(phi)*np.sin(tht)*data[i][1]+\
                    rad*np.cos(phi)*data[i][0] +\
                    rad*np.cos(tht)*data[i][2]
@@ -435,9 +450,6 @@ class DATtoVTK:
         '''
         newcoords = np.zeros(data.shape)
         i = 0
-        vp = np.sqrt(c.G * self.mass.to(u.M_jup).to(u.kg) / (self.radius.to(u.m))).value
-        vp = (vp * 100)/(2*np.pi*self.VEL)
-        print vp
         for ind in inds:
             phi = (self.unfiltered[ind[0]][0] + self.unfiltered[ind[0]+1][0])/2.0 # Azimuth
             rad = (self.unfiltered[ind[0]][1] + self.unfiltered[ind[3]][1])/2.0   # Radial
@@ -445,16 +457,16 @@ class DATtoVTK:
 
             # 0 = az (phi), 1 = rad, 2 = pol (tht)  Use this one, velocity ordering is(n't) weird
             # 0 = pol(tht), 1 = az (phi) 2 = rad
-            xdot = np.sin(phi)*np.sin(tht)*data[i][1]+\
-                   rad*np.cos(phi)*np.sin(tht)*(data[i][0]+vp) +\
-                   rad*np.sin(phi)*np.cos(tht)*data[i][2]
-            ydot = np.cos(phi)*np.sin(tht)*data[i][1] -\
-                   rad*np.sin(phi)*np.sin(tht)*(data[i][0]+vp) +\
-                   rad*np.cos(phi)*np.cos(tht)*data[i][2]
+            ydot = np.sin(phi)*np.sin(tht)*data[i][1]+\
+                   rad*np.cos(phi)*data[i][0] +\
+                   rad*np.cos(tht)*data[i][2]
+            xdot = np.cos(phi)*np.sin(tht)*data[i][1] -\
+                   rad*np.sin(phi)*data[i][0] +\
+                   rad*np.cos(tht)*data[i][2]
             zdot = np.cos(tht)*data[i][1] -\
                    rad*np.sin(tht)*data[i][2]
             newcoords[i][0] = xdot
-            newcoords[i][1] = -1*ydot
+            newcoords[i][1] = ydot
             newcoords[i][2] = zdot
 
             i+=1

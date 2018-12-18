@@ -24,7 +24,7 @@ Alternatively
 
 or with full options:
 
-```python script_convert.py [first] [grid level] [radius] [mass] -l [last] -b [binary/ascii] -d [dir] -f [field list]```
+```python script_convert.py [first] [grid level] [radius] [mass] -l [last] [-v] -b [binary/ascii] -d [dir] -f [field list]```
 
 See script_convert.py for more details.
 

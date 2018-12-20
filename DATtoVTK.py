@@ -387,9 +387,9 @@ class DATtoVTK:
         return newcoords   
     def CartToSphere(self, data):
         newcoords = np.zeros(data.shape)
-        newcoords[:,0] = np.arctan(data[:,1]/data[:,0])
+        newcoords[:,0] = np.arctan2(data[:,1],data[:,0])
         newcoords[:,1] = np.sqrt(data[:,0]**2 + data[:,1]**2 + data[:,2]**2)
-        newcoords[:,2] = np.arctan(data[:,2]/newcoords[:,1])
+        newcoords[:,2] = np.arccos(data[:,2],newcoords[:,1])
         return newcoords
 
     
@@ -419,7 +419,7 @@ class DATtoVTK:
 
             # Shift to planet centered reference frame
             x = x - self.rcgs.value
-            sph = self.CartToSphere(np.array([[x,y,z]/self.rcgs.value]))
+            sph = self.CartToSphere(np.array([[x,y,z]])/self.rcgs.value)
 
             # So I don't have to change any of the rest of the math
             phi = sph[0][0]

@@ -138,8 +138,8 @@
 %%
 %% If you wish, you may supply running head information, although
 %% this information may be modified by the editorial offices.
-\shorttitle{DRAFT 1}
-\shortauthors{DRAFT 1}
+\shorttitle{JUPITER Data Processing}
+\shortauthors{Nasedkin}
 %%
 %% You can add a light gray and diagonal water-mark to the first page 
 %% with this command:
@@ -156,7 +156,7 @@
 
 \begin{document}
 
-\title{\textcolor{red}{\textbf{DRAFT 1}} Processing JUPITER Hydrodynamics Simulation Data for Visualisation in Paraview \textcolor{red}{\textbf{DRAFT 1}}}
+\title{Processing JUPITER Hydrodynamics Simulation Data for Visualisation in Paraview.}
 
 %% LaTeX will automatically break titles if they run longer than
 %% one line. However, you may use \\ to force a line break if
@@ -289,8 +289,6 @@ where $\epsilon = \rho c_{v}T$ and the adiabatic index $\gamma = 1.43$.
 
 JUPITER can then be supplied with a given set of initial conditions and system properties, and will calculate each of the hydrodynamic fields at each time step to explore planet-disk interactions and related physics. These must then be further processed for visualisation and study.
 \subsection{Adaptive Mesh Refinement}\label{sec:amr}
-\textcolor{red}{TALK TO JUDIT TO MAKE SURE THIS SECTION IS CORRECT}
-
 The nested mesh system used in JUPITER is an example of adaptive mesh refinement (AMR) techniques. 
 In general, AMR improves computational speed for a given maximum resolution, as it reduces the number of mesh elements in the grid while maintaining the high resolution in the region of interest as seen in Fig. \ref{fig:mesh}. 
 In JUPITER, the mesh is not truly adaptive, as the refinement regions are predefined in the region of the planet embedded in the circumstellar disk.
@@ -311,7 +309,6 @@ As JUPITER relies on parallel computation, each computational core will output t
 The first output file is a descriptor file that provides simulation properties, along with the positions in spherical coordinates of each of the vertices of the mesh for each mesh level. 
 For this report $\phi$ represents the azimuthal angle, and $\theta$ the polar angle from the z-axis, and coordinates are generally ordered ($\phi$, $r$, $\theta$). 
 The file is structured as follows:
-\textcolor{red}{TALK TO JUDIT ABOUT WHAT ELSE IS IN THE DESCRIPTOR FILE}
 \begin{lstlisting}
 [line 1]
 [line 2]
@@ -325,7 +322,7 @@ The file is structured as follows:
 [$r$ axis]
 [$\theta$ axis]
 \end{lstlisting}
-This structure is then repeated sequentially for each mesh refinement level, from coarse to fine. The first and last two components of each axis are ghost cells, and should not be read in. The number of components along each axis (e.g. $N_{\phi}$) takes this accounts for this, however it assumes zero index counting. Thus if there are $n$ $\phi$ components, the descriptor file will read $n-1$, and the total $\phi$ axis in the file will contain $n+4$ elements.
+This structure is then repeated sequentially for each mesh refinement level, from coarse to fine. The lines without descriptions are undocumented lines used within the JUPITER simulations, and are not relevant for this report. The first and last two components of each axis are ghost cells, and should not be read in. The number of components along each axis (e.g. $N_{\phi}$) takes this accounts for this, however it assumes zero index counting. Thus if there are $n$ $\phi$ components, the descriptor file will read $n-1$, and the total $\phi$ axis in the file will contain $n+4$ elements.
 
 Each hydrodynamic field is stored in a data file, with a data point for each cell of the mesh. Note that while the descriptor file stores the locations of the vertices of the cells, all of the field data is defined at the barycentre of a given cell. The data is stored as binary doubles, and is ordered such that for a given coordinates ($\phi_{i}$, $r_{j}$, $\theta_{k}$), $i$ is iterated the fastest and $k$ the slowest. For vector data (velocities), each component of the vector is ordered as a scalar, with the azimuthal velocity listed first in its entirety, followed by the radial component, followed by the polar component. This ordering is also user adjustable in JUPITER, and may change. All data is stored in code units, and must be converted to physical units after read in.
 
@@ -352,27 +349,6 @@ The legacy VTK format is structured into 5 parts:
 	\item Dataset attributes. This can be either \verb|POINT_DATA|, where each datapoint is located at a mesh vertex, or \verb|CELL_DATA|, where each datapoint is located at the centre of a cell. All JUPITER hydro fields are \verb|CELL_DATA|. Additionally, each datapoint can be either a \verb|SCALAR| or \verb|VECTOR|, the latter of which is used to store velocities.
 \end{enumerate}
 An example file is included in Appendix A.
-\subsection{Technical Challenges}
-Several technical challenges needed to be overcome to implement this data processing tool.
-\paragraph{Cell Counting}
-To visualise data in Paraview, cells cannot overlap, but the output from JUPITER contains overlapping cells within the ROI around the planet. 
-This creates challenges when indexing the vertices of cells, as the axss length is not constant.
-However, Paraview does allow grid points to occur without being used. 
-This allows us to store the full set of mesh points in the VTK file, and use a standard stride method with constant length axes to index cell vertices.
-Any cells with a vertex within the ROI are discarded, with the cell number being noted to allow for removal of the datapoint.
-
-\paragraph{Velocity Vectors}
-The conversion of the velocity vectors from the initial data file to the VTK file was not straightforward. 
-In the initial data file, the velocity vectors are stored component-wise, with the full list of azimuthal velocity components, followed by the radial and finally the polar velocities.
-These velocities have the azimuthal velocity of the planet subtracted, so we are in the co-rotating frame of the planet.
-These velocities are then converted from spherical to Cartesian coordinates using the following set of transformations:
-\begin{align}
-\dot{x} &= \dot{r}\sin{\phi}\sin{\theta} + r\dot{\phi}\cos{\phi}\sin{\theta} + r\dot{\theta}\sin{\phi}\cos{\theta}  \\
-\dot{y} &= -\dot{r}\cos{\phi}\sin{\theta} + r\dot{\phi}\sin{\phi}\sin{\theta} - r\dot{\theta}\cos{\phi}\cos{\theta}  \\
-\dot{z} & = \dot{r}\cos{\theta} - r\dot{\theta}\sin{\theta}
-\end{align}
-Where a dot denotes the time derivative of the coordinate.
-Note that the direction of the y component is inverted from the standard transformation.
 \subsection{Data Processing Methods}\label{sec:code}
 \textbf{Requirements}
 
@@ -430,47 +406,124 @@ To use the command line interface simply use \verb|python Convert.py|.
 Within the Convert.py script, the user can change whether to output to a binary or ascii VTK file, as well as the location of the input data from JUPITER. This data must be in a folder labelled outputXXXXX where the X's denote the simulation output number with leading zeros. The default path to this directory is the current working directory.
 
 A second interface has been developed to allow for easier bash scripting. To use this, enter the following into the command line or a bash script:
-\verb|python script_Convert.py [first] [grid level]\ | \newline \verb|[radius] [mass] -l [last] -b [binary/ascii] -d\ |\newline\verb|[dir] -f [field list]|
+\verb|python script_Convert.py [first] [grid level]\ | \newline \verb|[radius] [mass] [-l [last]] [-v]\| \newline \verb|[-b [binary/ascii]] [-d[dir]]\ |\newline\verb|[-f [field list]]|
 
-Or without all optional tagged arguments:\newline
-\verb|python script_Convert.py first [grid_level]\ |\newline \verb|[radius] [mass] -f [field list]|
+Or without all of the optional tagged arguments:\newline
+\verb|python script_Convert.py first [grid_level]\ |\newline \verb|[radius] [mass] [-f [field list]]|
 
 Tagged arguments can be placed in any order, but the field list must be the last argument passed.
 \begin{itemize}
 	\item \verb|[first]| The first simulation output to process.
-	\item \verb|- l [last]| The last simulation output to process. Assumes that all integers between first and last exist and should be processed.
+	\item \verb|[- l [last]]| The last simulation output to process. Assumes that all integers between first and last exist and should be processed.
 	\item \verb|[grid_level]| The mesh refinement level.
 	\item \verb|[radius]| The orbital radius of the planet in AU.
 	\item \verb|[mass]| The mass of the star in solar masses.
-	\item \verb|-b [binary/ascii]| A string (b)inary or (a)scii to set the output file type. Binary is recommended, and is the default value.
-	\item \verb|-d [dir]| Directory where the output folder from JUPITER is located
-	\item \verb|-f [field_list]| A list of space separated strings denoting which hydro fields should be converted.
+	\item \verb|[-v]| Include if velocities should be planet centred. 
+	\item \verb|[-b [binary/ascii]]| A string (b)inary or (a)scii to set the output file type. Binary is recommended, and is the default value.
+	\item \verb|[-d [dir]]| Directory where the output folder from JUPITER is located
+	\item \verb|[-f [field_list]]| A list of space separated strings denoting which hydro fields should be converted.
 \end{itemize}
-\section{Results}\label{sec:res}
+\subsection{Technical Challenges}
+Several technical challenges needed to be overcome to implement this data processing tool.
+\paragraph{Cell Counting}
+To visualise data in Paraview, cells cannot overlap, but the output from JUPITER contains overlapping cells within the ROI around the planet. 
+This creates challenges when indexing the vertices of cells, as the axss length is not constant.
+However, Paraview does allow grid points to occur without being used. 
+This allows us to store the full set of mesh points in the VTK file, and use a standard stride method with constant length axes to index cell vertices.
+Any cells with a vertex within the ROI are discarded, with the cell number being noted to allow for removal of the datapoint.
+
+\paragraph{Velocity Vectors}
+The conversion of the velocity vectors from the initial data file to the VTK file was not straightforward. 
+In the initial data file, the velocity vectors are stored component-wise, with the full list of azimuthal velocity components, followed by the radial and finally the polar velocities.
+These velocities have the azimuthal velocity of the planet subtracted, so we are in the co-rotating frame of the planet.
+These velocities are then converted from spherical to Cartesian coordinates using the following set of transformations:
+\begin{align}
+\dot{x} &= \dot{r}\sin{\phi}\sin{\theta} + r\dot{\phi}\cos{\phi}\sin{\theta} + r\dot{\theta}\sin{\phi}\cos{\theta}  \\
+\dot{y} &= -\dot{r}\cos{\phi}\sin{\theta} + r\dot{\phi}\sin{\phi}\sin{\theta} - r\dot{\theta}\cos{\phi}\cos{\theta}  \\
+\dot{z} & = \dot{r}\cos{\theta} - r\dot{\theta}\sin{\theta}
+\end{align}
+Where a dot denotes the time derivative of the coordinate.
+Note that the direction of the y component is inverted from the standard transformation.
+\section{Paraview Visualisation}
+\subsection{Paraview}
+Paraview is an interactive visualisation program that allows the user to visualise large datasets,with the processing done either in serial on a local machine or distributed on a server.
+As with the VTK file format, Paraview is an open source project primarily developed by Kitware, with additional funding and support from the Sandia and Los Alamos National Laboratories.
+While the full scope of Paraview's visualisation tools is extensive, and detailed in the user guide \cite{para}, we will outline some of the common techniques relevant to this report.
+
+Once a VTK file has been produced by the conversion tool, it can be opened in Paraview. 
+The user may then select a suitable colour map for the data. 
+Best practices should be followed when producing publication-ready visualisations. Colour hue and brightness should be considered to allow for accessible images that can convey the content of the data. A large range in brightness and hue will allow small variations in the data to be more visible. 
+The luminosity should be consistent across the colour range, so as not to emphasise certain features, unless these are the features in the data that should be emphasised. 
+Many pre-made colour palettes are available in Paraview, including standard matplotlib palettes commonly used in python or matlab visualisations, allowing for standardisation across various tools.
+Opacity scaling, and logarithmic colour scales are also useful tools when visualising complex data.
+
+In addition to colour, Paraview also allows the user to select various ways of representing the data in a 3D render. The default is to view the surface of the object, additional options can represent the data as points in space, a volume render, a wireframe or other options. These can be used to develop a better understanding of the 3 dimensional nature of the data.
+
+Following the initial rendering, \textbf{filters} can be applied to the data.
+Paraview currently includes around 120 different filters, several commonly used ones are summarised here.
+
+\begin{itemize}
+\item[]\textbf{Slice}
+Extract a 2D slice from 3D data given an orientation and position.
+
+\item[]\textbf{Clip}
+Given an orientation and position, remove all cells `outside' of the cut.
+
+\item[]\textbf{Threshold}
+Remove all cells below a minimum, or above a maximum threshold.
+
+\item[]\textbf{Glyphs}
+Visualise vector data as arrows or other objects for flow visualisation. Typically set to show every nth vector.
+
+\item[]\textbf{Stream Tracer}
+Compute particle trajectories in a flow and visualise using streamlines. The user should set an initial point, with a small radius, and select whether to integrate forwards or backwards from that point (or both). For speed, an RK2 integrator is suggested. Typically only a small number of streamlines are necessary to visualise the flow.
+
+\item[]\textbf{Tube}
+Replace the streamlines generated by a Stream Tracer filter with 3 dimensional tubes, for easier viewing.
+\end{itemize}
+All of these filters can be combined in various ways to generate interesting and informative visualisations. Velocity vectors can be plotted over density fields; multiple slices can show the 3D structure of the temperature field. Additional tools include axis visibility, with customisable labelling, background settings (solid colour, gradient or image), alternate render views (slice view, charts, etc.) animations and more.
+
+In addition to Paraview, the python VTK library allows for scripting of these visualisations, which could be used to automate and standardise visualisations for a project.
+
+\subsection{Results}\label{sec:res}
 \begin{figure}
 	\centering
-	\includegraphics[width=0.95\linewidth]{figures/Dens5YCut0Zoom.png}
-	\caption{\label{fig:dens} Cross section of gas density of the circumplanetary disk of a planet embedded at 50 AU in the circumstellar disk of a 1 solar mass star.}
-	\includegraphics[width=0.9\linewidth]{figures/DensityStructure3D.png}
+	\includegraphics[width=\linewidth]{figures/DensWithGrid.png}
+	\caption{\label{fig:dens} Cross section of gas density of the circumplanetary disk of a 1 Jupiter mass planet embedded at 50 AU in the circumstellar disk of a 1 solar mass star.}
+	\includegraphics[width=\linewidth]{figures/DensityStructure3D.png}
 	\caption{\label{fig:d3d} 3D density structure of the circumplanetary disk.}
 \end{figure}
-With the conversion tool developed, we can present several examples of possible visualisations made using Paraview \cite{para}. Fig. \ref{fig:dens} shows a cross section of the gas density in the region of the circumplanetary disk along with the 3D density structure in Fig. \ref{fig:d3d}. Fig. \ref{fig:temp} shows the gas temperature of the mid-plane of the disk, coloured to a blackbody spectrum. Fig. \ref{fig:vel} shows the gas velocity in the circumplanetary disk, showing that the gas is spiralling away from the planet. Fig. \ref{ref:energy} shows the increase in internal energy of the gas near the planet as it is adiabatically compressed.
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=0.95\linewidth]{figures/DensityVelPlanetCentered5MJ001AU_2.png}
+	\caption{\label{fig:vel}Velocity vectors spiralling out from the circumplanetary disk.}
+\end{figure*}
+
+With the conversion tool developed, we can present several examples of possible visualisations made using Paraview \cite{para}. Fig. \ref{fig:dens} shows a cross section of the gas density in the region of the circumplanetary disk along with the 3D density structure in Fig. \ref{fig:d3d}. This shows the dens regions near to the forming planet, and a potential location for satellite formation. Fig. \ref{fig:temp} shows the gas temperature of the mid-plane of the disk, coloured to a blackbody spectrum.
+
+Fig. \ref{fig:vel} shows the gas velocity in the circumplanetary disk, showing that the gas is spiralling away from the planet. This demonstrates that the circumplanetary disk is \textit{not} an accretion disk, but rather a de-accretion disk, as gas that flows in from above and below the planet spirals away in the disk. This flow is also shown in Fig. \ref{fig:tube}. In addition, Fig. \ref{fig:shock} shows the location in the temperature profile where the infowing gas shocks as it approaches the dense planet. Fig. \ref{ref:energy} shows the increase in internal energy of the gas near the planet as it is adiabatically compressed.
 
 More complicated renders -- particularly when rendering 3D volumes -- are very computationally expensive, and it is recommended to set up a Paraview server dedicated to rendering the dataset.
 Other possibilities include 3D time series animates, image generation using python scripts, streamline and flow visualisation and more.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{figures/260/GasVelTube.png}
+	\caption{\label{fig:tube} Inflow of gas from above onto an accreting planet.}
+\end{figure}
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{figures/TempPlotCircumplanetary5MJ001AU_4.png}
+	\caption{\label{fig:shock} Shock front of gas flow near to the planet.}
+\end{figure}
 \begin{figure}
 	\centering
 	\includegraphics[width=0.95\linewidth]{figures/Temp/GasTempMidplane.png}
 	\caption{\label{fig:temp} Temperature of the mid-plane of the circumstellar disk.}
-
-	\centering
-	\includegraphics[width=0.95\linewidth]{figures/VelGlyphs/VelGlyphs5Circumplanetary.png}
-	\caption{\label{fig:vel}Velocity vectors spiralling out from the circumplanetary disk.}
 \end{figure}
-
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=0.9\linewidth]{figures/GasEnergy1.png}
+	\includegraphics[width=\linewidth]{figures/GasEnergy1.png}
 	\caption{\label{ref:energy}Total internal energy of the gas near the planet.}
 \end{figure}
 \section{Conclusions}\label{sec:con}

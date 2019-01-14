@@ -28,7 +28,7 @@ parser.add_argument('m',action = 'store',nargs = 1,type = float,
                     metavar = 'mass', help= 'stellar mass')
 parser.add_argument('-d',"--directory",action = 'store', nargs = 1,
 		    required = False,	
-                    help= "Directory to output folders")
+                    help= "Directory to output folders, should contain a folder labelled outputXXXXX, where XXXXX is the simulation output number padded to 5 digits.")
 parser.add_argument('-b',action = 'store', nargs = 1, metavar = 'binary', required = False,
                     help= '(b)inary or (a)scii')
 parser.add_argument('-v', action = 'store_true',required = False,
@@ -57,6 +57,8 @@ for i in range(args.o[0],args.last[0]+1):
         dv.SetRadius(args.r[0])
         dv.SetMass(args.m[0])
         dv.SetFeature(f)
+        if not args.directory[0].endswith("/"):
+            args.directory[0] += "/"
         if args.directory is None:
             dv.SetupDirs()
         else:

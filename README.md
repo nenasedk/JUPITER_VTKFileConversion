@@ -13,6 +13,9 @@ output from JUPITER hydrodynamic simulations into .vtk format.
 * vtk `pip install vtk`
 * astropy (for unit converions)
 
+## Environment
+A pipenv environment has been setup for this project. After pipenv has been installed with pip, the program can be run in the specified environemnt using ```pipenv shell'''. This is primarily for use with the matplotlib style plots of the VTK output files.
+
 ## USAGE:
 The class can be run from the Convert.py script 
 

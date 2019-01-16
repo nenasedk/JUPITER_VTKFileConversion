@@ -28,10 +28,13 @@ import os,sys
 
 # VTK File and path
 VTK_FILE = "gasdensity260_5.vtk"
+#VTK_VEL_FILE = "gasvelocity260_5.vtk"
+
 VTK_DIR = "/home/evert/Documents/SemesterProject/output/opa_5jup_50AU/VTK00260/"
+
+
 # Constants
 AU = 1.496e+13 #cm
-
 
 def GetVTKScalarOutput(filename,filepath,scalar_name):
     """
@@ -99,10 +102,18 @@ def GetNumpyMesh(points):
         z[i] = pt[2]
     return x,y,z
 
-def PlotData(x,y,data,levels = 255,
+def PlotData(x,y,data,levels = 255, 
              title = "", xlabel = "", ylabel = "", cbar_label = "",
              cmap = cm.plasma, log = True, outdir = "", dpi = 400,
              figsize = (15,15)):
+    """
+    PlotData
+
+    This function wraps pyplot.tricontourf, generating a triangulated,
+    filled grid. This is the only plotting function that can generate
+    a filled contour for a scalar (ie density) on an irregular grid, 
+    without using meshgrid. Our data is too large for meshgrid.
+    """
     fig,ax = plt.subplots(figsize = figsize)
     if log:
         # Plot a triangulated, filled contour.
@@ -117,17 +128,85 @@ def PlotData(x,y,data,levels = 255,
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
-    cbar = plt.colorbar(tcf,ax = ax)
-    cbar.set_label("Log of Gas Density [$g/cm^{3}$]")
+    cbar = fig.colorbar(tcf,ax = ax)
+    cbar.set_label(cbar_label)
+       if len(outdir)>0 and not outdir.endswith("/") :
+        outdir += "/"
     plt.savefig(outdir + title + ".png", dpi = dpi)
     plt.show()
-    if len(outdir)>0 and not outdir.endswith("/") :
+    return ax
+ 
+def PlotStreams(x,y,u,v,
+                title = "", xlabel = "", ylabel = "", cbar_label = "",
+                linewidth = None, density = 1,
+                minlength = 0.1, int_dir = 'both',
+                cmap = cm.plasma, log = True, outdir = "", dpi = 400,
+                figsize = (15,15)):
+    """
+    PlotStreams
+
+    This function wraps puplot.streamplot, plotting
+    u,v velocity streamlines on a grid.
+    """
+    fig,ax = plt.subplots(figsize = figsize)
+    strm = ax.streamplot(x,y,u,v,
+                        density = density, linewidth = linewidth
+                        minlength = minlength,
+                        integration_direction = int_dir,cmap = cmap)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    cbar = fig.colorbar(strm,ax = ax)
+    cbar.set_label(cbar_label)
+       if len(outdir)>0 and not outdir.endswith("/") :
         outdir += "/"
+    plt.savefig(outdir + title + ".png", dpi = dpi)
+    plt.show()
+    return ax
 
-
+def SuperposePlot(x,y,u,v,data,levels = 255, 
+                  title = "", xlabel = "", ylabel = "", cbar_label = "",
+                  linewidth = None, density = 1,
+                  minlength = 0.1, int_dir = 'both',
+                  cmap = cm.plasma, log = True, outdir = "", dpi = 400,
+                  figsize = (15,15)):
+    """
+    This function (should) plot a velocity streamplot
+    overlaid on top of a data contour. Could probably
+    change to call previously defined functions rather
+    than reimplementing.
+    """
+    fig,axes = plt.subplots(figsize = figsize)
+    if log:
+        # Plot a triangulated, filled contour.
+        res =( np.ceil(np.log10(data.max())+1) - np.floor(np.log10(data.min())-1) )/levels
+        lev_exp = np.arange(np.floor(np.log10(data.min())-1),
+                            np.ceil(np.log10(data.max())+1),
+                            res)
+        levs = np.power(10, lev_exp)
+        tcf = ax[0].tricontourf(x,y,data,levs, norm=colors.LogNorm(), cmap = cmap,zorder = 0)
+    else:
+        tcf = ax.tricontourf(x,y,data,levels,cmap = cmap)
+    ax[0].set_xlabel(xlabel)
+    ax[0].set_ylabel(ylabel)
+    ax[0].set_title(title)
+    cbar_data = fig.colorbar(tcf,ax = ax[0])
+    cbar_data.set_label(cbar_label)
+    
+    strm = ax[1].streamplot(x,y,u,v,
+                        density = density, linewidth = linewidth
+                        minlength = minlength,
+                            integration_direction = int_dir,cmap = cmap,zorder = 1)
+    cbar_strm = fig.colorbar(strm,ax = ax[1])
+    cbar_strm.set_label(cbar_label)
+       if len(outdir)>0 and not outdir.endswith("/") :
+        outdir += "/"
+    plt.savefig(outdir + title + ".png", dpi = dpi)
+    plt.show()
 
 # Read in the data
 reader = GetVTKScalarOutput(VTK_FILE,VTK_DIR,"gasdensity")
+#vel_reader = GetVTKScalarOutput(VTK_FILE,VTK_DIR,"gasvelocity")
 """
 VTK FILTERING
 
@@ -149,16 +228,27 @@ cutter.SetCutFunction(plane)
 cutter.SetInputConnection(reader.GetOutputPort())
 cutter.Update()
 
-# Map filter to data
+# Map filter to cell data - dens,temp etc., NOT Vel
 cutMapper = vtk.vtkCellDataToPointData()
 cutMapper.AddInputData(cutter.GetOutput())
 cutMapper.Update()
+
+# Velocity slicing
+velCutter = vtk.vtkCutter()
+velCutter.SetCutFunction(plane)
+velCutter.SetInputConnection(vel_reader.GetOutputPort())
+velCutter.Update()
+
+velCutMapper = vtk.vtkPolyDataMapper()
+velCutMapper.AddInputData(velCutter.GetOutput())
+velCutMapper.Update()
 """
 END OF SCRIPTING
 """
 # Get Data and mesh coordinates
 x,y,z = GetNumpyMesh(cutter.GetOutput().GetPoints())
 data = GetDataAsNumpy(cutMapper)
+v_data = GetDataAsNumpy(velCutMapper)
 # Convert Units (optional, assumes VTK File was stored in CGS units
 x = x/AU
 y = y/AU

@@ -28,7 +28,7 @@ import os,sys
 
 # VTK File and path
 VTK_FILE = "gasdensity260_5.vtk"
-#VTK_VEL_FILE = "gasvelocity260_5.vtk"
+VTK_VEL_FILE = "gasvelocity260_5.vtk"
 
 VTK_DIR = "/home/evert/Documents/SemesterProject/output/opa_5jup_50AU/VTK00260/"
 
@@ -49,7 +49,7 @@ def GetVTKScalarOutput(filename,filepath,scalar_name):
     """
     if os.path.isfile(filepath + filename):
         reader = vtk.vtkUnstructuredGridReader()
-        reader.SetFileName(VTK_DIR + VTK_FILE)
+        reader.SetFileName(filepath + filename)
         reader.SetScalarsName(scalar_name)
         reader.Update()
     else:
@@ -68,15 +68,19 @@ def GetVTKVectorOutput(filename,filepath,vector_name):
     and returns the output object of the reader for the specified
     vectorial hydrodynamic field.
     """
-    reader = vtk.vtkUnstructuredGridReader()
-    reader.SetFileName(VTK_DIR + VTK_FILE)
-    reader.SetVectorsName(vector_name)
-    reader.Update()
-    return  reader.GetOutput()
+    if os.path.isfile(filepath + filename):
+        reader = vtk.vtkUnstructuredGridReader()
+        reader.SetFileName(filepath + filename)
+        reader.SetVectorsName(vector_name)
+        reader.Update()
+    else:
+        print "File does not exist."
+        sys.exit(1)
+    return reader
 
 def GetDataAsNumpy(vtk_mapper, array_num = 0):
     """
-    GetDataAsNumpy
+    GetScalarDataAsNumpy
     :vtk_mapper: VTKmapper object containing the filtered data
     :array_num: array number of interest if multiple fields stored in one file
     
@@ -101,6 +105,7 @@ def GetNumpyMesh(points):
         y[i] = pt[1]
         z[i] = pt[2]
     return x,y,z
+
 
 def PlotData(x,y,data,levels = 255, 
              title = "", xlabel = "", ylabel = "", cbar_label = "",
@@ -130,7 +135,7 @@ def PlotData(x,y,data,levels = 255,
     ax.set_title(title)
     cbar = fig.colorbar(tcf,ax = ax)
     cbar.set_label(cbar_label)
-       if len(outdir)>0 and not outdir.endswith("/") :
+    if len(outdir)>0 and not outdir.endswith("/") :
         outdir += "/"
     plt.savefig(outdir + title + ".png", dpi = dpi)
     plt.show()
@@ -138,8 +143,8 @@ def PlotData(x,y,data,levels = 255,
  
 def PlotStreams(x,y,u,v,
                 title = "", xlabel = "", ylabel = "", cbar_label = "",
-                linewidth = None, density = 1,
-                minlength = 0.1, int_dir = 'both',
+                linewidth = None, 
+                minlength = 0.1, 
                 cmap = cm.plasma, log = True, outdir = "", dpi = 400,
                 figsize = (15,15)):
     """
@@ -149,16 +154,17 @@ def PlotStreams(x,y,u,v,
     u,v velocity streamlines on a grid.
     """
     fig,ax = plt.subplots(figsize = figsize)
-    strm = ax.streamplot(x,y,u,v,
-                        density = density, linewidth = linewidth
-                        minlength = minlength,
-                        integration_direction = int_dir,cmap = cmap)
+    strm = ax.quiver(x,y,u,v,
+                     units = 'x',
+                     linewidth = linewidth,
+                     minlength = minlength,
+                     cmap = cmap)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
-    cbar = fig.colorbar(strm,ax = ax)
-    cbar.set_label(cbar_label)
-       if len(outdir)>0 and not outdir.endswith("/") :
+    #cbar = plt.colorbar(strm,ax = ax)
+    #cbar.set_label(cbar_label)
+    if len(outdir)>0 and not outdir.endswith("/"):
         outdir += "/"
     plt.savefig(outdir + title + ".png", dpi = dpi)
     plt.show()
@@ -166,8 +172,8 @@ def PlotStreams(x,y,u,v,
 
 def SuperposePlot(x,y,u,v,data,levels = 255, 
                   title = "", xlabel = "", ylabel = "", cbar_label = "",
-                  linewidth = None, density = 1,
-                  minlength = 0.1, int_dir = 'both',
+                  linewidth = None,
+                  minlength = 0.1, 
                   cmap = cm.plasma, log = True, outdir = "", dpi = 400,
                   figsize = (15,15)):
     """
@@ -193,20 +199,20 @@ def SuperposePlot(x,y,u,v,data,levels = 255,
     cbar_data = fig.colorbar(tcf,ax = ax[0])
     cbar_data.set_label(cbar_label)
     
-    strm = ax[1].streamplot(x,y,u,v,
-                        density = density, linewidth = linewidth
+    strm = ax[1].quiver(x,y,u,v,
+                        linewidth = linewidth,
                         minlength = minlength,
-                            integration_direction = int_dir,cmap = cmap,zorder = 1)
+                        cmap = cmap,zorder = 1)
     cbar_strm = fig.colorbar(strm,ax = ax[1])
     cbar_strm.set_label(cbar_label)
-       if len(outdir)>0 and not outdir.endswith("/") :
+    if len(outdir)>0 and not outdir.endswith("/") :
         outdir += "/"
     plt.savefig(outdir + title + ".png", dpi = dpi)
     plt.show()
 
 # Read in the data
 reader = GetVTKScalarOutput(VTK_FILE,VTK_DIR,"gasdensity")
-#vel_reader = GetVTKScalarOutput(VTK_FILE,VTK_DIR,"gasvelocity")
+vel_reader = GetVTKVectorOutput(VTK_VEL_FILE,VTK_DIR,"gasvelocity")
 """
 VTK FILTERING
 
@@ -223,6 +229,7 @@ plane.SetOrigin(0,0,10)
 plane.SetNormal(0,0,1)
 
 # Create cut filter
+
 cutter=vtk.vtkCutter()
 cutter.SetCutFunction(plane)
 cutter.SetInputConnection(reader.GetOutputPort())
@@ -239,7 +246,7 @@ velCutter.SetCutFunction(plane)
 velCutter.SetInputConnection(vel_reader.GetOutputPort())
 velCutter.Update()
 
-velCutMapper = vtk.vtkPolyDataMapper()
+velCutMapper = vtk.vtkCellDataToPointData()
 velCutMapper.AddInputData(velCutter.GetOutput())
 velCutMapper.Update()
 """
@@ -256,15 +263,6 @@ z = z/AU
 # Plot the data
 # Plot a triangulated, filled contour
 '''
-fig, ax = plt.subplots(figsize = (16,20))
-res =( np.ceil(np.log10(data.max())+1) - np.floor(np.log10(data.min())-1) )/255
-lev_exp = np.arange(np.floor(np.log10(data.min())-1),
-                    np.ceil(np.log10(data.max())+1),
-                    res)
-levs = np.power(10, lev_exp)
-tcf = ax.tricontourf(x,y,data,levs, norm=colors.LogNorm())
-plt.show()
-'''
 PlotData(x,y,data,
          levels = 255,
          title = "Gas Density of circumstellar disk around a 5 Jupiter mass planet at 50 AU",
@@ -273,5 +271,21 @@ PlotData(x,y,data,
          cbar_label = "Log of Gas Density [$g/cm^{3}$]",
          outdir = VTK_DIR + "Images/",
          log = True,
-         dpi = 150
+         dpi = 150,
          figsize = (8,8))
+'''
+# Plot the velocity data
+# Plot streamlines
+plotnth = 400
+v_data = v_data[0:-1:plotnth]
+x = x[0:-1:plotnth]
+y = y[0:-1:plotnth]
+PlotStreams(x,y,v_data[:,0],v_data[:,1],
+            title = "Velocity of circumstellar disk around a 5 Jupiter mass planet at 50 AU",
+            xlabel = "x [AU]",
+            ylabel = "y [AU]",
+            cbar_label = "Gas Speed [cm/s]",
+            outdir = VTK_DIR + "Images/",
+            log = True,
+            dpi = 150,
+            figsize = (8,8))

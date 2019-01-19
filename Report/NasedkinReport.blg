@@ -3,54 +3,49 @@ Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: NasedkinReport.aux
 The style file: aasjournal.bst
 Database file #1: biblio.bib.bib
-I was expecting a `,' or a `}'---line 103 of file biblio.bib.bib
- : 
- : file = {:home/evert/Documents/Papers/SemesterProject/1810.04564.pdf:pdf},
-(Error may have been on previous line)
-I'm skipping whatever remains of this entry
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Warning--empty journal in MR0119433
 Warning--empty journal in Szulagyi2016
 Warning--empty journal in Formats2009
-You've used 8 entries,
+You've used 11 entries,
             3222 wiz_defined-function locations,
-            716 strings with 6273 characters,
-and the built_in function-call counts, 3793 in all, are:
-= -- 289
-> -- 318
-< -- 2
-+ -- 108
-- -- 119
-* -- 337
-:= -- 710
-add.period$ -- 9
-call.type$ -- 8
-change.case$ -- 50
-chr.to.int$ -- 8
-cite$ -- 11
-duplicate$ -- 141
-empty$ -- 230
-format.name$ -- 121
-if$ -- 744
+            738 strings with 6986 characters,
+and the built_in function-call counts, 5248 in all, are:
+= -- 416
+> -- 418
+< -- 3
++ -- 142
+- -- 156
+* -- 459
+:= -- 968
+add.period$ -- 15
+call.type$ -- 11
+change.case$ -- 70
+chr.to.int$ -- 11
+cite$ -- 14
+duplicate$ -- 195
+empty$ -- 328
+format.name$ -- 163
+if$ -- 1045
 int.to.chr$ -- 1
 int.to.str$ -- 0
-missing$ -- 8
-newline$ -- 30
-num.names$ -- 32
-pop$ -- 74
+missing$ -- 11
+newline$ -- 42
+num.names$ -- 44
+pop$ -- 102
 preamble$ -- 1
-purify$ -- 50
+purify$ -- 70
 quote$ -- 0
-skip$ -- 104
+skip$ -- 151
 stack$ -- 0
-substring$ -- 104
+substring$ -- 157
 swap$ -- 0
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 69
+type$ -- 93
 warning$ -- 3
-while$ -- 29
+while$ -- 40
 width$ -- 0
-write$ -- 83
-(There was 1 error message)
+write$ -- 119
+(There were 3 warnings)

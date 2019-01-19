@@ -677,7 +677,7 @@ Typeset using \LaTeX\ {\bf modern} style in AASTeX62}
 \ifpreprint
 \vspace*{-\headsep}\vspace*{\headheight}
 \footnotesize
-\noindent{\sc Draft version \today}\\[2pt]
+\noindent{\sc \today}\\[2pt]
 {\footnotesize Typeset using \LaTeX\ {\bf preprint} style in AASTeX62}
 \par\vspace*{-\baselineskip}\vspace*{0.625in}
 \else
@@ -1315,7 +1315,7 @@ the#1\endcsname}
 % \journalinfo{\@submitted}
 
  \def\journalinfo#1{\gdef\@journalinfo{#1}}
- \journalinfo{Draft version \today}
+ \journalinfo{\today}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

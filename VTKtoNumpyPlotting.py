@@ -23,6 +23,7 @@ import vtk
 from vtk.util.numpy_support import vtk_to_numpy
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 from matplotlib import cm,colors
 import os,sys
 
@@ -106,7 +107,6 @@ def GetNumpyMesh(points):
         z[i] = pt[2]
     return x,y,z
 
-
 def PlotData(x,y,data,levels = 255, 
              title = "", xlabel = "", ylabel = "", cbar_label = "",
              cmap = cm.plasma, log = True, outdir = "", dpi = 400,
@@ -130,11 +130,13 @@ def PlotData(x,y,data,levels = 255,
         tcf = ax.tricontourf(x,y,data,levs, norm=colors.LogNorm(), cmap = cmap)
     else:
         tcf = ax.tricontourf(x,y,data,levels,cmap = cmap)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    ax.set_title(title)
-    cbar = fig.colorbar(tcf,ax = ax)
-    cbar.set_label(cbar_label)
+    ax.set_xlabel(xlabel,fontsize = 18)
+    ax.set_ylabel(ylabel,fontsize = 18)
+    ax.set_title(title,fontsize = 26)
+
+    #ticks = np.logspace(data.min(),data.max(),6)
+    cbar = fig.colorbar(tcf,format ='%.2E')
+    cbar.set_label(cbar_label,fontsize = 16)
     if len(outdir)>0 and not outdir.endswith("/") :
         outdir += "/"
     plt.savefig(outdir + title + ".png", dpi = dpi)
@@ -262,7 +264,7 @@ y = y/AU
 z = z/AU
 # Plot the data
 # Plot a triangulated, filled contour
-'''
+
 PlotData(x,y,data,
          levels = 255,
          title = "Gas Density of circumstellar disk around a 5 Jupiter mass planet at 50 AU",
@@ -289,3 +291,4 @@ PlotStreams(x,y,v_data[:,0],v_data[:,1],
             log = True,
             dpi = 150,
             figsize = (8,8))
+'''

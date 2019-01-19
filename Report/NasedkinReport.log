@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.10.23)  19 DEC 2018 19:09
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.10.23)  19 JAN 2019 18:26
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -88,10 +88,10 @@ Class revtex4-1 Info: RevTeX society APS selected on input line 31.
 Class revtex4-1 Info: Selecting journal pra on input line 7544.
 Class revtex4-1 Info: APS journal PRA selected on input line 7545.
 
-(/usr/share/texlive/texmf-dist/tex/latex/revtex/aps10pt4-1.rtx
-File: aps10pt4-1 2010/07/25/20:33:00 4.1r (http://publish.aps.org/revtex4/ for 
+(/usr/share/texlive/texmf-dist/tex/latex/revtex/aps12pt4-1.rtx
+File: aps12pt4-1 2010/07/25/20:33:00 4.1r (http://publish.aps.org/revtex4/ for 
 documentation)
-Class revtex4-1 Info: RevTeX pointsize 10pt selected on input line 30.
+Class revtex4-1 Info: RevTeX pointsize 12pt selected on input line 30.
 )
 (/usr/share/texlive/texmf-dist/tex/latex/textcase/textcase.sty
 Package: textcase 2004/10/07 v0.07 Text only upper/lower case changing (DPC)
@@ -776,46 +776,124 @@ File: pgfmodulematrix.code.tex 2013/09/17  (rcs-revision 1.8)
 zlibrarytopaths.code.tex
 File: tikzlibrarytopaths.code.tex 2008/06/17 v3.0.1a (rcs-revision 1.2)
 )))
-Class revtex4-1 Info: Unrecognized array package. Please update this document c
-lass! (Proceeding with fingers crossed.) on input line 157.
-Class revtex4-1 Info: Patching unrecognized longtable package. (Proceeding with
- fingers crossed) on input line 157.
-Class revtex4-1 Info: Robustifying \LaTeX's \boldmath command on input line 157
-.
-Class revtex4-1 Info: cite was not loaded (OK!) on input line 157.
-Class revtex4-1 Info: mcite was not loaded (OK!) on input line 157.
-Class revtex4-1 Info: multicol was not loaded (OK!) on input line 157.
- (./NasedkinReport.aux
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryshapes.code.tex
+File: tikzlibraryshapes.code.tex 2008/01/09 v3.0.1a (rcs-revision 1.1)
 
-LaTeX Warning: Label `sec:code' multiply defined.
-
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryshapes.geometric.code.tex
+File: tikzlibraryshapes.geometric.code.tex 2008/01/09 v3.0.1a (rcs-revision 1.1
 )
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshape
+s.geometric.code.tex
+File: pgflibraryshapes.geometric.code.tex 2008/06/26 v3.0.1a (rcs-revision 1.1)
+
+))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryshapes.misc.code.tex
+File: tikzlibraryshapes.misc.code.tex 2008/01/09 v3.0.1a (rcs-revision 1.1)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshape
+s.misc.code.tex
+File: pgflibraryshapes.misc.code.tex 2013/07/18 v3.0.1a (rcs-revision 1.5)
+))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryshapes.symbols.code.tex
+File: tikzlibraryshapes.symbols.code.tex 2008/01/09 v3.0.1a (rcs-revision 1.1)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshape
+s.symbols.code.tex
+File: pgflibraryshapes.symbols.code.tex 2013/09/11 v3.0.1a (rcs-revision 1.6)
+))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryshapes.arrows.code.tex
+File: tikzlibraryshapes.arrows.code.tex 2008/01/09 v3.0.1a (rcs-revision 1.1)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshape
+s.arrows.code.tex
+File: pgflibraryshapes.arrows.code.tex 2008/06/26 v3.0.1a (rcs-revision 1.1)
+))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryshapes.callouts.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshape
+s.callouts.code.tex))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryshapes.multipart.code.tex
+File: tikzlibraryshapes.multipart.code.tex 2008/01/09 v3.0.1a (rcs-revision 1.1
+)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshape
+s.multipart.code.tex
+File: pgflibraryshapes.multipart.code.tex 2010/01/07 v3.0.1a (rcs-revision 1.2)
+
+\pgfnodepartlowerbox=\box71
+\pgfnodeparttwobox=\box72
+\pgfnodepartthreebox=\box73
+\pgfnodepartfourbox=\box74
+\pgfnodeparttwentybox=\box75
+\pgfnodepartnineteenbox=\box76
+\pgfnodeparteighteenbox=\box77
+\pgfnodepartseventeenbox=\box78
+\pgfnodepartsixteenbox=\box79
+\pgfnodepartfifteenbox=\box80
+\pgfnodepartfourteenbox=\box81
+\pgfnodepartthirteenbox=\box82
+\pgfnodeparttwelvebox=\box83
+\pgfnodepartelevenbox=\box84
+\pgfnodeparttenbox=\box85
+\pgfnodepartninebox=\box86
+\pgfnodeparteightbox=\box87
+\pgfnodepartsevenbox=\box88
+\pgfnodepartsixbox=\box89
+\pgfnodepartfivebox=\box90
+)))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryarrows.code.tex
+File: tikzlibraryarrows.code.tex 2008/01/09 v3.0.1a (rcs-revision 1.1)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/pgflibraryarrows.code.
+tex
+File: pgflibraryarrows.code.tex 2013/09/23 v3.0.1a (rcs-revision 1.16)
+\arrowsize=\dimen189
+))
+Class revtex4-1 Info: Unrecognized array package. Please update this document c
+lass! (Proceeding with fingers crossed.) on input line 159.
+Class revtex4-1 Info: Patching unrecognized longtable package. (Proceeding with
+ fingers crossed) on input line 159.
+Class revtex4-1 Info: Robustifying \LaTeX's \boldmath command on input line 159
+.
+Class revtex4-1 Info: cite was not loaded (OK!) on input line 159.
+Class revtex4-1 Info: mcite was not loaded (OK!) on input line 159.
+Class revtex4-1 Info: multicol was not loaded (OK!) on input line 159.
+ (./NasedkinReport.aux)
 \openout1 = `NasedkinReport.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 157.
-LaTeX Font Info:    ... okay on input line 157.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 157.
-LaTeX Font Info:    ... okay on input line 157.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 157.
-LaTeX Font Info:    ... okay on input line 157.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 157.
-LaTeX Font Info:    ... okay on input line 157.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 157.
-LaTeX Font Info:    ... okay on input line 157.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 157.
-LaTeX Font Info:    ... okay on input line 157.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 157.
-LaTeX Font Info:    ... okay on input line 157.
- (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 159.
+LaTeX Font Info:    ... okay on input line 159.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 159.
+LaTeX Font Info:    ... okay on input line 159.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 159.
+LaTeX Font Info:    ... okay on input line 159.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 159.
+LaTeX Font Info:    ... okay on input line 159.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 159.
+LaTeX Font Info:    ... okay on input line 159.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 159.
+LaTeX Font Info:    ... okay on input line 159.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 159.
+LaTeX Font Info:    ... okay on input line 159.
+
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count187
-\scratchdimen=\dimen189
-\scratchbox=\box71
+\scratchdimen=\dimen190
+\scratchbox=\box91
 \nofMPsegments=\count188
 \nofMParguments=\count189
 \everyMPshowfont=\toks41
 \MPscratchCnt=\count190
-\MPscratchDim=\dimen190
+\MPscratchDim=\dimen191
 \MPnumerator=\count191
 \makeMPintoPDFobject=\count192
 \everyMPtoPDFconversion=\toks42
@@ -836,8 +914,8 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-\AtBeginShipoutBox=\box72
-Package hyperref Info: Link coloring ON on input line 157.
+\AtBeginShipoutBox=\box92
+Package hyperref Info: Link coloring ON on input line 159.
 
 (/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
@@ -847,10 +925,10 @@ Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
 \c@section@level=\count193
 )
-LaTeX Info: Redefining \ref on input line 157.
-LaTeX Info: Redefining \pageref on input line 157.
-LaTeX Info: Redefining \nameref on input line 157.
-LaTeX Info: Redefining \microtypecontext on input line 157.
+LaTeX Info: Redefining \ref on input line 159.
+LaTeX Info: Redefining \pageref on input line 159.
+LaTeX Info: Redefining \nameref on input line 159.
+LaTeX Info: Redefining \microtypecontext on input line 159.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
@@ -868,12 +946,12 @@ File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman
 \c@lstlisting=\count194
 
 ABD: EveryShipout initializing macros
-LaTeX Font Info:    Try loading font information for U+lasy on input line 208.
+LaTeX Font Info:    Try loading font information for U+lasy on input line 211.
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/ulasy.fd
 File: ulasy.fd 1998/08/17 v2.2e LaTeX symbol font definitions
 )
-LaTeX Font Info:    Try loading font information for U+msa on input line 208.
+LaTeX Font Info:    Try loading font information for U+msa on input line 211.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
@@ -881,7 +959,7 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 208.
+LaTeX Font Info:    Try loading font information for U+msb on input line 211.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -889,126 +967,180 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-LaTeX Font Info:    Font shape `U/lasy/b/n' in size <7> not available
-(Font)              Font shape `U/lasy/m/n' tried instead on input line 208.
-LaTeX Font Info:    Font shape `U/lasy/b/n' in size <5> not available
-(Font)              Font shape `U/lasy/m/n' tried instead on input line 208.
 LaTeX Font Info:    Font shape `U/lasy/b/n' in size <8> not available
-(Font)              Font shape `U/lasy/m/n' tried instead on input line 208.
+(Font)              Font shape `U/lasy/m/n' tried instead on input line 211.
 LaTeX Font Info:    Font shape `U/lasy/b/n' in size <6> not available
-(Font)              Font shape `U/lasy/m/n' tried instead on input line 208.
-LaTeX Font Info:    Font shape `U/lasy/b/n' in size <9> not available
-(Font)              Font shape `U/lasy/m/n' tried instead on input line 253.
-LaTeX Font Info:    Try loading font information for U+dsrom on input line 267.
+(Font)              Font shape `U/lasy/m/n' tried instead on input line 211.
+LaTeX Font Info:    Font shape `U/lasy/b/n' in size <7> not available
+(Font)              Font shape `U/lasy/m/n' tried instead on input line 211.
+LaTeX Font Info:    Font shape `U/lasy/b/n' in size <5> not available
+(Font)              Font shape `U/lasy/m/n' tried instead on input line 211.
+LaTeX Font Info:    Try loading font information for U+dsrom on input line 275.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/doublestroke/Udsrom.fd
 File: Udsrom.fd 1995/08/01 v0.1 Double stroke roman font definitions
 ) [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-<figures/meshface.png, id=72, 7708.8pt x 4336.2pt>
-File: figures/meshface.png Graphic file (type png)
-<use figures/meshface.png>
-Package pdftex.def Info: figures/meshface.png  used on input line 303.
-(pdftex.def)             Requested size: 242.26653pt x 136.23373pt.
-Package microtype Info: Loading generic protrusion settings for font family
-(microtype)             `cmtt' (encoding: OT1).
-(microtype)             For optimal results, create family-specific settings.
-(microtype)             See the microtype manual for details.
- [2 <./figures/meshface.png (PNG copy)>]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 372.
+<figures/Presentation/meshface.png, id=60, 1322.3001pt x 790.152pt>
+File: figures/Presentation/meshface.png Graphic file (type png)
+<use figures/Presentation/meshface.png>
+Package pdftex.def Info: figures/Presentation/meshface.png  used on input line 
+308.
+(pdftex.def)             Requested size: 242.26653pt x 144.76518pt.
+<figures/Presentation/vcycle.jpg, id=62, 395.4775pt x 257.96375pt>
+File: figures/Presentation/vcycle.jpg Graphic file (type jpg)
+<use figures/Presentation/vcycle.jpg>
+Package pdftex.def Info: figures/Presentation/vcycle.jpg  used on input line 32
+0.
+(pdftex.def)             Requested size: 242.26653pt x 158.0268pt.
+ [2 <./figures/Presentation/meshface.png>]
 
- (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
-File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 372.
- [3]
-Underfull \hbox (badness 1609) in paragraph at lines 405--407
-[]\OT1/cmr/m/n/10 (+20) To use the com-mand line in-ter-face sim-ply use
- []
+LaTeX Warning: A float is stuck (cannot be placed) on input line 324.
 
 
-Overfull \hbox (4.48132pt too wide) in paragraph at lines 408--410
-[][]\OT1/cmtt/m/n/10 python script_Convert.py [first] [grid level]\  
- []
-
-[4]
-<figures/DensWithGrid.png, id=134, 3262.1875pt x 1618.045pt>
-File: figures/DensWithGrid.png Graphic file (type png)
-<use figures/DensWithGrid.png>
-Package pdftex.def Info: figures/DensWithGrid.png  used on input line 491.
-(pdftex.def)             Requested size: 242.26653pt x 120.16304pt.
-<figures/DensityStructure3D.png, id=135, 2748.2675pt x 1618.045pt>
-File: figures/DensityStructure3D.png Graphic file (type png)
-<use figures/DensityStructure3D.png>
-Package pdftex.def Info: figures/DensityStructure3D.png  used on input line 493
-.
-(pdftex.def)             Requested size: 242.26653pt x 142.63036pt.
-<figures/DensityVelPlanetCentered5MJ001AU_2.png, id=136, 3262.1875pt x 1618.045
-pt>
-File: figures/DensityVelPlanetCentered5MJ001AU_2.png Graphic file (type png)
-<use figures/DensityVelPlanetCentered5MJ001AU_2.png>
-Package pdftex.def Info: figures/DensityVelPlanetCentered5MJ001AU_2.png  used o
-n input line 498.
-(pdftex.def)             Requested size: 487.45999pt x 241.75809pt.
- [5 <./figures/DensWithGrid.png (PNG copy)> <./figures/DensityStructure3D.png (
-PNG copy)>]
-<figures/260/GasVelTube.png, id=154, 3003.22pt x 1618.045pt>
-File: figures/260/GasVelTube.png Graphic file (type png)
-<use figures/260/GasVelTube.png>
-Package pdftex.def Info: figures/260/GasVelTube.png  used on input line 511.
-(pdftex.def)             Requested size: 242.26653pt x 130.50789pt.
-<figures/TempPlotCircumplanetary5MJ001AU_4.png, id=155, 3003.22pt x 1618.045pt>
-
-File: figures/TempPlotCircumplanetary5MJ001AU_4.png Graphic file (type png)
-<use figures/TempPlotCircumplanetary5MJ001AU_4.png>
-Package pdftex.def Info: figures/TempPlotCircumplanetary5MJ001AU_4.png  used on
- input line 516.
-(pdftex.def)             Requested size: 242.26653pt x 130.50789pt.
-<figures/Temp/GasTempMidplane.png, id=156, 980.66376pt x 809.0225pt>
-File: figures/Temp/GasTempMidplane.png Graphic file (type png)
-<use figures/Temp/GasTempMidplane.png>
-Package pdftex.def Info: figures/Temp/GasTempMidplane.png  used on input line 5
-21.
-(pdftex.def)             Requested size: 230.15245pt x 189.86107pt.
-<figures/GasEnergy1.png, id=157, 2748.2675pt x 1618.045pt>
-File: figures/GasEnergy1.png Graphic file (type png)
-<use figures/GasEnergy1.png>
-Package pdftex.def Info: figures/GasEnergy1.png  used on input line 526.
-(pdftex.def)             Requested size: 242.26653pt x 142.63036pt.
- [6 <./figures/DensityVelPlanetCentered5MJ001AU_2.png (PNG copy)> <./figures/26
-0/GasVelTube.png (PNG copy)> <./figures/TempPlotCircumplanetary5MJ001AU_4.png (
-PNG copy)>]
-
-LaTeX Warning: A float is stuck (cannot be placed) on input line 535.
-
-
-LaTeX Warning: A float is stuck (cannot be placed) on input line 535.
+LaTeX Warning: A float is stuck (cannot be placed) on input line 324.
 
 
 Class revtex4-1 Warning: Deferred float stuck during \clearpage processing.
 
-(./NasedkinReport.bbl) [7 <./figures/Temp/GasTempMidplane.png (PNG copy)> <./fi
-gures/GasEnergy1.png (PNG copy)>] [8]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 607.
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `cmtt' (encoding: OT1).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+[3 <./figures/Presentation/vcycle.jpg>]
+Overfull \hbox (0.86232pt too wide) in paragraph at lines 355--357
+\OT1/cmr/m/n/12 (-20) be ex-actly [][]\OT1/cmtt/m/n/12 # vtk DataFile Version x
+.x
+ []
+
+
+Underfull \hbox (badness 3168) in paragraph at lines 362--363
+\OT1/cmr/m/n/12 (+20) ini-ti-ated by line [][]\OT1/cmtt/m/n/12 POINTS n datatyp
+e[]\OT1/cmr/m/n/12 (+20) ,
+ []
+
+[4]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 391.
+
+ (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 391.
+ [5]
+<figures/Presentation/paraview.png, id=130, 1927.2pt x 1084.05pt>
+File: figures/Presentation/paraview.png Graphic file (type png)
+<use figures/Presentation/paraview.png>
+Package pdftex.def Info: figures/Presentation/paraview.png  used on input line 
+473.
+(pdftex.def)             Requested size: 242.26653pt x 136.26682pt.
+ [6]
+
+LaTeX Warning: A float is stuck (cannot be placed) on input line 479.
+
+
+LaTeX Warning: A float is stuck (cannot be placed) on input line 479.
+
+
+Class revtex4-1 Warning: Deferred float stuck during \clearpage processing.
+
+<figures/DensityStructure3D.png, id=148, 2748.2675pt x 1618.045pt>
+File: figures/DensityStructure3D.png Graphic file (type png)
+<use figures/DensityStructure3D.png>
+Package pdftex.def Info: figures/DensityStructure3D.png  used on input line 489
+.
+(pdftex.def)             Requested size: 242.26653pt x 142.63036pt.
+[7 <./figures/Presentation/paraview.png> <./figures/DensityStructure3D.png (PNG
+ copy)>] [8]
+
+LaTeX Warning: A float is stuck (cannot be placed) on input line 573.
+
+
+LaTeX Warning: A float is stuck (cannot be placed) on input line 573.
+
+
+Class revtex4-1 Warning: Deferred float stuck during \clearpage processing.
+
+<figures/Presentation/mpl.png, id=176, 994.4352pt x 712.5822pt>
+File: figures/Presentation/mpl.png Graphic file (type png)
+<use figures/Presentation/mpl.png>
+Package pdftex.def Info: figures/Presentation/mpl.png  used on input line 594.
+(pdftex.def)             Requested size: 242.26653pt x 173.60014pt.
+[9 <./figures/Presentation/mpl.png>]
+<figures/Presentation/recirc.png, id=187, 1522.68875pt x 561.09625pt>
+File: figures/Presentation/recirc.png Graphic file (type png)
+<use figures/Presentation/recirc.png>
+Package pdftex.def Info: figures/Presentation/recirc.png  used on input line 61
+2.
+(pdftex.def)             Requested size: 242.26653pt x 89.2721pt.
+<figures/Presentation/Gaps/Gaps.png, id=195, 980.9448pt x 948.1824pt>
+File: figures/Presentation/Gaps/Gaps.png Graphic file (type png)
+<use figures/Presentation/Gaps/Gaps.png>
+Package pdftex.def Info: figures/Presentation/Gaps/Gaps.png  used on input line
+ 626.
+(pdftex.def)             Requested size: 205.92802pt x 199.03737pt.
+ [10 <./figures/Presentation/recirc.png> <./figures/Presentation/Gaps/Gaps.png>
+]
+<figures/Presentation/OutFlowCross.png, id=209, 3834.325pt x 2061.7025pt>
+File: figures/Presentation/OutFlowCross.png Graphic file (type png)
+<use figures/Presentation/OutFlowCross.png>
+Package pdftex.def Info: figures/Presentation/OutFlowCross.png  used on input l
+ine 635.
+(pdftex.def)             Requested size: 513.11743pt x 275.89548pt.
+
+
+Class revtex4-1 Warning: Float cannot be placed.
+
+<figures/Presentation/GasShock.png, id=210, 902.1705pt x 483.2454pt>
+File: figures/Presentation/GasShock.png Graphic file (type png)
+<use figures/Presentation/GasShock.png>
+Package pdftex.def Info: figures/Presentation/GasShock.png  used on input line 
+640.
+(pdftex.def)             Requested size: 513.11743pt x 274.86284pt.
+(./NasedkinReport.bbl
+Missing character: There is no Ã in font cmr10!
+Missing character: There is no ¡ in font cmr10!
+) [11]
+
+LaTeX Warning: A float is stuck (cannot be placed) on input line 711.
+
+[12 <./figures/Presentation/OutFlowCross.png (PNG copy)> <./figures/Presentatio
+n/GasShock.png>] [13]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 752.
  (./NasedkinReport.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 607.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 607.
-
-
-LaTeX Warning: There were multiply-defined labels.
-
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 752.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 752.
  )
 (\end occurred when \ifx on line 99 was incomplete)
 (\end occurred when \ifx on line 99 was incomplete)
 (\end occurred when \ifx on line 99 was incomplete)
 (\end occurred when \ifx on line 99 was incomplete)
 (\end occurred when \ifx on line 99 was incomplete)
+(\end occurred when \ifx on line 99 was incomplete)
+(\end occurred when \ifx on line 99 was incomplete)
+(\end occurred when \ifx on line 99 was incomplete)
+(\end occurred when \ifx on line 99 was incomplete)
+(\end occurred when \ifx on line 99 was incomplete)
+(\end occurred when \ifx on line 99 was incomplete)
+(\end occurred when \ifx on line 99 was incomplete)
+(\end occurred when \ifx on line 99 was incomplete)
+(\end occurred when \ifx on line 99 was incomplete)
+(\end occurred when \ifx on line 99 was incomplete)
 (\end occurred when \ifx on line 96 was incomplete)
 (\end occurred when \ifx on line 96 was incomplete)
 (\end occurred when \ifx on line 96 was incomplete)
 (\end occurred when \ifx on line 96 was incomplete)
 (\end occurred when \ifx on line 96 was incomplete)
+(\end occurred when \ifx on line 96 was incomplete)
+(\end occurred when \ifx on line 96 was incomplete)
+(\end occurred when \ifx on line 96 was incomplete)
+(\end occurred when \ifx on line 96 was incomplete)
+(\end occurred when \ifx on line 96 was incomplete)
+(\end occurred when \ifx on line 91 was incomplete)
+(\end occurred when \ifx on line 91 was incomplete)
+(\end occurred when \ifx on line 91 was incomplete)
+(\end occurred when \ifx on line 91 was incomplete)
+(\end occurred when \ifx on line 91 was incomplete)
 (\end occurred when \ifx on line 91 was incomplete)
 (\end occurred when \ifx on line 91 was incomplete)
 (\end occurred when \ifx on line 91 was incomplete)
@@ -1020,8 +1152,28 @@ LaTeX Warning: There were multiply-defined labels.
 (\end occurred when \ifx on line 81 was incomplete)
 (\end occurred when \ifx on line 81 was incomplete)
 (\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \iffalse on line 81 was incomplete)
 (\end occurred when \ifx on line 81 was incomplete)
 (\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \iffalse on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \iffalse on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \ifx on line 81 was incomplete)
+(\end occurred when \iffalse on line 81 was incomplete)
 (\end occurred when \ifx on line 81 was incomplete)
 (\end occurred when \ifx on line 81 was incomplete)
 (\end occurred when \ifx on line 81 was incomplete)
@@ -1035,8 +1187,28 @@ LaTeX Warning: There were multiply-defined labels.
 (\end occurred when \ifx on line 74 was incomplete)
 (\end occurred when \ifx on line 74 was incomplete)
 (\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \iffalse on line 74 was incomplete)
 (\end occurred when \ifx on line 74 was incomplete)
 (\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \iffalse on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \iffalse on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \ifx on line 74 was incomplete)
+(\end occurred when \iffalse on line 74 was incomplete)
 (\end occurred when \ifx on line 74 was incomplete)
 (\end occurred when \ifx on line 74 was incomplete)
 (\end occurred when \ifx on line 74 was incomplete)
@@ -1045,36 +1217,34 @@ LaTeX Warning: There were multiply-defined labels.
 (\end occurred when \ifx on line 74 was incomplete)
 (\end occurred when \ifx on line 74 was incomplete) 
 Here is how much of TeX's memory you used:
- 21937 strings out of 492982
- 385069 string characters out of 6134895
- 534143 words of memory out of 5000000
- 24893 multiletter control sequences out of 15000+600000
- 23474 words of font info for 140 fonts, out of 8000000 for 9000
+ 24410 strings out of 492982
+ 455831 string characters out of 6134895
+ 625291 words of memory out of 5000000
+ 27300 multiletter control sequences out of 15000+600000
+ 26106 words of font info for 155 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,17n,54p,806b,1338s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 55i,17n,67p,833b,921s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-di
 st/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fon
-ts/type1/public/amsfonts/cm/cmbx8.pfb></usr/share/texlive/texmf-dist/fonts/type
-1/public/amsfonts/cm/cmbx9.pfb></usr/share/texlive/texmf-dist/fonts/type1/publi
-c/amsfonts/cm/cmcsc10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
-fonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/
-cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmm
-i7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmib10.pf
-b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr
-/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/t
-exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/t
-exmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dis
-t/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/
-public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfon
-ts/cm/cmti8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
-mti9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.p
-fb></usr/share/texlive/texmf-dist/fonts/type1/public/doublestroke/dsrom10.pfb>
-Output written on NasedkinReport.pdf (8 pages, 4226644 bytes).
+ts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmcsc10.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
+blic/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+mib10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.p
+fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/
+texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-
+dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/ty
+pe1/public/amsfonts/cm/cmti12.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
+blic/amsfonts/cm/cmtt12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/d
+oublestroke/dsrom12.pfb>
+Output written on NasedkinReport.pdf (13 pages, 4715412 bytes).
 PDF statistics:
- 295 PDF objects out of 1000 (max. 8388607)
- 254 compressed objects within 3 object streams
- 104 named destinations out of 1000 (max. 500000)
- 24117 words of extra memory for PDF output out of 24883 (max. 10000000)
+ 343 PDF objects out of 1000 (max. 8388607)
+ 293 compressed objects within 3 object streams
+ 119 named destinations out of 1000 (max. 500000)
+ 25146 words of extra memory for PDF output out of 29859 (max. 10000000)
 

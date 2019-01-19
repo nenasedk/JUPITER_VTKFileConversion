@@ -6,10 +6,20 @@
 Ahrens, J., Geveci, B., \& Law, C. 2005, ParaView: An End-User Tool for Large
   Data Visualization (Elsevier)
 
+\bibitem[{Avila \& Kitware(2010)}]{avila2010vtk}
+Avila, L., \& Kitware, I. 2010, The VTK User's Guide (Kitware).
+\newblock \url{https://books.google.ch/books?id=6IxSewAACAAJ}
+
 \bibitem[{Bitsch {et~al.}(2013)Bitsch, Crida, Morbidelli, Kley, \&
   Dobbs-Dixon}]{Bitsch2013}
 Bitsch, B., Crida, A., Morbidelli, A., Kley, W., \& Dobbs-Dixon, I. 2013,
   A{\&}A, 549, 124
+
+\bibitem[{Cilibrasi {et~al.}(2018)Cilibrasi, Szulágyi, Mayer, Dra̧żkowska,
+  Miguel, \& Inderbitzi}]{satellite}
+Cilibrasi, M., Szulágyi, J., Mayer, L., {et~al.} 2018, Monthly Notices of the
+  Royal Astronomical Society, 480, 4355.
+\newblock \url{http://dx.doi.org/10.1093/mnras/sty2163}
 
 \bibitem[{{Commer{\c{c}}on, B.} {et~al.}(2011){Commer{\c{c}}on, B.}, {Teyssier,
   R.}, {Audit, E.}, {Hennebelle, P.}, \& {Chabrier, G.}}]{comm2011}
@@ -26,6 +36,11 @@ Bitsch, B., Crida, A., Morbidelli, A., Kley, W., \& Dobbs-Dixon, I. 2013,
 
 \bibitem[{Godunov(1959)}]{MR0119433}
 Godunov, S.~K. 1959, 47 (89), 271
+
+\bibitem[{Sampath {et~al.}(2010)Sampath, Barai, \& Nukala}]{vcycle}
+Sampath, R.~S., Barai, P., \& Nukala, P. K. V.~V. 2010, Journal of Statistical
+  Mechanics: Theory and Experiment, 2010, P03029.
+\newblock \url{http://stacks.iop.org/1742-5468/2010/i=03/a=P03029}
 
 \bibitem[{Szul{\'{a}}gyi {et~al.}(2016)Szul{\'{a}}gyi, Masset, Lega, Crida,
   Morbidelli, \& Guillot}]{Szulagyi2016}

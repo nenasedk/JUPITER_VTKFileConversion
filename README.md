@@ -23,13 +23,13 @@ The class can be run from the Convert.py script
 
 Alternatively
 
-```python script_convert.py [first] [grid_level] [radius] [mass] -f [field list]```
+```python script_Convert.py [first] [grid_level] [radius] [mass] -f [field list]```
 
 or with full options:
 
-```python script_convert.py [first] [grid level] [radius] [mass] -l [last] [-v] -b [binary/ascii] -d [dir] -f [field list]```
+```python script_Convert.py [first] [grid level] [radius] [mass] -l [last] [-v] -b [binary/ascii] -d [dir] -f [field list]```
 
-See script_convert.py for more details.
+See script_Convert.py for more details.
 
 ## Process:
 Set up of  science factors and directories based on the user input

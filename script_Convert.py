@@ -32,7 +32,7 @@ parser.add_argument('-d',"--directory",action = 'store', nargs = 1,
 parser.add_argument('-b',action = 'store', nargs = 1, metavar = 'binary', required = False,
                     help= '(b)inary or (a)scii')
 parser.add_argument('-v', action = 'store_true',required = False,
-                    help= 'Planet centred vels if included')
+                    help= 'Planet centered vels if included')
 parser.add_argument('-f','--fields',action = 'append', nargs = argparse.REMAINDER,
                     help= 'list of hydrodynamic fields to convert',
 	   	    required = True)

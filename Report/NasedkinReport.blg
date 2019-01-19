@@ -7,45 +7,45 @@ Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Warning--empty journal in MR0119433
 Warning--empty journal in Szulagyi2016
 Warning--empty journal in Formats2009
-You've used 11 entries,
+You've used 13 entries,
             3222 wiz_defined-function locations,
-            738 strings with 6986 characters,
-and the built_in function-call counts, 5248 in all, are:
-= -- 416
-> -- 418
-< -- 3
-+ -- 142
-- -- 156
-* -- 459
-:= -- 968
-add.period$ -- 15
-call.type$ -- 11
-change.case$ -- 70
-chr.to.int$ -- 11
-cite$ -- 14
-duplicate$ -- 195
-empty$ -- 328
-format.name$ -- 163
-if$ -- 1045
+            753 strings with 7354 characters,
+and the built_in function-call counts, 5960 in all, are:
+= -- 477
+> -- 452
+< -- 5
++ -- 153
+- -- 166
+* -- 507
+:= -- 1095
+add.period$ -- 18
+call.type$ -- 13
+change.case$ -- 79
+chr.to.int$ -- 13
+cite$ -- 16
+duplicate$ -- 229
+empty$ -- 393
+format.name$ -- 178
+if$ -- 1197
 int.to.chr$ -- 1
 int.to.str$ -- 0
-missing$ -- 11
-newline$ -- 42
-num.names$ -- 44
-pop$ -- 102
+missing$ -- 13
+newline$ -- 49
+num.names$ -- 52
+pop$ -- 117
 preamble$ -- 1
-purify$ -- 70
+purify$ -- 79
 quote$ -- 0
-skip$ -- 151
+skip$ -- 180
 stack$ -- 0
-substring$ -- 157
+substring$ -- 178
 swap$ -- 0
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 93
+type$ -- 108
 warning$ -- 3
-while$ -- 40
+while$ -- 47
 width$ -- 0
-write$ -- 119
+write$ -- 141
 (There were 3 warnings)

@@ -298,7 +298,7 @@ where $\epsilon = \rho c_{v}T$ and the adiabatic index $\gamma = 1.43$.
 JUPITER can then be supplied with a given set of initial conditions and system properties, and will calculate each of the hydrodynamic fields at each time step to explore planet-disk interactions and related physics. These must then be further processed for visualisation and study.
 \subsection{Adaptive Mesh Refinement}\label{sec:amr}
 The nested mesh system used in JUPITER is an example of adaptive mesh refinement (AMR) techniques. 
-In general, AMR improves computational speed for a given maximum resolution, as it reduces the number of mesh elements in the grid while maintaining the high resolution in the region of interest as seen in Fig. \ref{fig:mesh}. 
+In general, AMR improves computational speed for a given maximum resolution, as it reduces the number of mesh elements in the grid while maintaining the high resolution in the region of interest as seen in Fig. \ref{fig:mesh}. A more complete treatment of adaptive or multigrid solvers can be found in \cite{hockney1988computer}. 
 
 In JUPITER, the mesh is not truly adaptive, as the refinement regions are predefined in the region of the planet embedded in the circumstellar disk.
 Other AMR techniques could refine the mesh only in regions of steep density or velocity gradients. 
@@ -309,12 +309,12 @@ In contrast, JUPITER uses a static grid, and allows the flow to evolve throughou
 	\caption{\label{fig:mesh}2D projection of nested mesh levels around the location of the planet from a JUPITER simulation.}
 \end{figure}
 
-When using adaptive or multigrid solvers, the results of computations at one refinement level are used to provide the initial conditions for the next level to reduce computation time, and is shown in Fig. \ref{fig:vcycle} 
+When using adaptive or multigrid solvers, the results of computations at one refinement level are used to provide the initial conditions for the next level to reduce computation time, and is shown in Fig. \ref{fig:vcycle}. 
 Starting with the finest grid, a first solution is found. 
 This solution is \textit{restricted} to the overlapping region of the next finest grid. 
 This process is repeated to the coarsest grid, where the full solution is calculated.
 These results are then \textit{prolongated} down to the finer mesh, and again all the way back to the finest level, where a solution is achieved. 
-This process can then be iterated, and is known as the v-cycle.
+This process can then be iterated, and is known as the v-cycle \cite{hockney1988computer}.
 
 \begin{figure}
 	\includegraphics[width=\linewidth]{figures/Presentation/vcycle.jpg}
@@ -595,6 +595,12 @@ The point coordinate grid can likewise be converted to a numpy array, and read i
 	\caption{\label{fig:mpl}Matplotlib style figure of the density of a circumstellar disk.}
 \end{figure}  
 
+\begin{figure*}[htb!]
+	\centering
+	\includegraphics[width=1.0\linewidth]{figures/Presentation/OutFlowCross.png}
+	\caption{\label{fig:vel} Vertical inflow of gas shocking near the surface of the accreting 1 M$_{J}$ planet, followed by the outflow of gas in the circumplanetary disk.}
+\end{figure*}
+
 We found that the function \verb|tricontourf()| produces the best outputs for scalar fields, as many other plotting functions require 2D pixel grids for each axis. 
 With millions of coordinate points and an irregular grid, this quickly grows larger than the available memory on a consumer-grade computer.
 \verb|Tricontourf| uses Delauney triangulation to create a grid from 1D coordinate axes, which can be irregular. The data is then mapped over the grid, and plotted with a filled contour. The resolution of the colourscale can also be specified. 
@@ -605,41 +611,53 @@ Vector plots are difficult, and do not produce insightful results.
 Stream plots are currently impossible due to the above mentioned memory issues - this is a known issue with the matplotlib Streamplot function.
 Therefore, while useful for generating simple plots in a standardised format, matplotlib remains less useful for more complex visualisations.
 
+
 \subsection{Results}\label{sec:res}
-With the conversion tool developed, we can present several examples of possible visualisations made using Paraview \cite{para}. In this section we discuss the scientific results of the simulations.
-\begin{figure}
-	\centering
+With the conversion tool developed, we can present several examples of possible visualisations made using Paraview \cite{para}. In this section we discuss the scientific results of a set of JUPITER simulations. 
+
+
+These simulations primarily consist of 100AU radius circumstellar disks with a single embedded planet of varying mass at 50AU.
+The gas in the simulations is considered to be ideal, with an equation of state $P = (\gamma - 1)E_{int}$, with $\gamma$ = 1.43, while the mean molecular weight was 2.43.
+The kinematic viscosity of the simulations is low, with a value of $10^{-5}a^{2}\Omega_{p}$, or $\alpha \approx 0.004$ at R$_{p}$. The density is close to that of a Minimum Mass Solar Nebula \cite{MSMN}. 
+The initial disk aspect ratio was set to H/r = 0.05, where H is the pressure scale-height of the disk. 
+The upper surface of the disk is radiatively heated from stellar flux.
+For the opacity calculation, the dust-to-gas ratio of the disk was set to the standard value for the interstellar medium of 0.01.
+
+\begin{figure}[h]
 	\includegraphics[width=\linewidth]{figures/Presentation/recirc.png}
-	\caption{\label{fig:recirc} Recirculation of gas from the CPD into the circumstellar disk.}
+	\caption{\label{fig:recirc}Meridional recirculation of gas from the CPD back into the circumstellar disk.}
+\end{figure}
+
+\begin{figure}[htb!]
+	\centering
+	\includegraphics[width=\linewidth]{figures/Presentation/Gaps/Gaps.png}
+	\caption{\label{fig:gaps}Variation of gap widths and depths over a range of embedded planetary masses. The colour scale is in units of g cm$^{-3}$. From 1 M$_{J}$ to 10 M$_{J}$, the gap width increases by a factor of 2, while the depth decreases from 8$\times10^{-16}$g cm$^{-3}$ to 5$\times10^{-20}$g cm$^{-3}$.}
 \end{figure}
 
 \subsubsection{Circumplanetary disk flow}
-\textbf{Circulation and outflow}
-During planet formation, the planet attracts gas and dust from the local region as it accretes. The JUPITER simulations show that this flow of material towards the planet is primarily from the vertical directions, Fig. \ref{fig:vel}. Gas from the edges of the gap where the CPD is embedded flows accelerates vertically towards accreting planet. As the gas in the region of the planet is adiabatically compressed, it heats up and forms a high pressure region surrounding the planet. The inflowing gas shocks on this region, forming a high temperature discontinuity, and losing most of its velocity Fig. \ref{fig:tshock}. Some of the material is then accreted onto the planet, while the majority flows outward in the CPD, before being recycled into the circumstellar disk, Fig. \ref{fig:recirc}.
 
-\textbf{Dust traps and implications for satellite formation}
-Visible in Figs.  \ref{fig:vel},  \ref{fig:tshock}, there are regions where inflowing gas from the circumstellar disk and outflowing gas from the CPD meet. This forms a circular ring around the CPD that acts as a dust trap, providing an ideal location for satellite formation. While beyond the scope of this report to analyse in detail, it is discussed in \cite{satellite}.
+During planet formation, the planet attracts gas and dust from the local environment. The JUPITER simulations show that this flow of material towards the planet is primarily from the vertical directions, Fig. \ref{fig:vel}. Gas from the edges of the gap where the CPD is embedded flows accelerates vertically towards accreting planet. As the gas in the region of the planet is adiabatically compressed, it heats up and forms a high pressure region surrounding the planet. The inflowing gas shocks on this region, forming a high temperature discontinuity, and losing most of its velocity Fig. \ref{fig:tshock}. Some of the material is then accreted onto the planet, while the majority flows outward in the CPD, before being recycled into the circumstellar disk, Fig. \ref{fig:recirc}. The strength of this shock, along with the sharpness of the density discontinuity of the CPD and the gap in general will vary with both the planet mass and initial temperature. An exploration of the structure of CPDs can be found in \cite{Szulagyi2016}.
+ 
+\renewcommand{\topfraction}{1}
+\renewcommand{\bottomfraction}{1}
+
+\begin{figure*}[htb!]
+	\centering
+	\includegraphics[width=0.95\linewidth]{figures/Presentation/GasShock.png}
+	\caption{\label{fig:tshock} High temperature shock near the surface of the accreting 1 M$_{J}$ planet planet. After shocking on the high pressure region surrounding the planet, the inflowing gas loses most of its energy and spirals out in the CPD.}
+\end{figure*}
+
+\subsubsection{Dust traps and implications for satellite formation}
+
+Visible in Figs.  \ref{fig:vel} and \ref{fig:tshock}, there are regions where inflowing gas from the circumstellar disk and outflowing gas from the CPD meet.
+ Inflowing gas from the gap walls flows over this high pressure region and the CPD, forming a vortex on the upper edge of the CPD. This forms a circular ring around the CPD that acts as a dust trap, providing an ideal location for satellite formation.  According to \cite{satellite}, the dust-to-gas ratio in the dust trap can increase to 1 or greater. While beyond the scope of this report to analyse this phenomena in detail, it is discussed at length in \cite{satellite}.
 
 \subsubsection{Gap profiles}
-\begin{figure}
-	\centering
-	\includegraphics[width=0.85\linewidth]{figures/Presentation/Gaps/Gaps.png}
-	\caption{\label{fig:gaps}Variation of gap widths and depths over a range of embedded planetary masses. The color scale is in units of g cm$^{-3}$. From 1 M$_{J}$ to 10 M$_{J}$, the gap width increases by a factor of 2, while the depth decreases from 8$\times10^{-16}$g cm$^{-3}$ to 5$\times10^{-20}$g cm$^{-3}$.}
-\end{figure}
+
 In addition to the flow analysis, we can also examine the gap properties that arise from planet-disk interactions. 
-In Fig. \ref{fig:gaps}, we see that both the gap widths and gap depths increase as the planet mass increases. From 1 M$_{J}$ to 10 M$_{J}$, the gap width increases by a factor of 2, while the depth decreases from 8$\times10^{-16}$g cm$^{-3}$ to 5$\times10^{-20}$g cm$^{-3}$. However, these properties are also highly dependant on the radial position of the planet, and are also highly viscosity dependant. The set of simulations examined in this report does not cover a sufficient population to make conclusive statements about the relationship between planet properties and observable effects.
+In Fig. \ref{fig:gaps}, we see that both the gap widths and gap depths increase as the planet mass increases. Comparing the 1 M$_{J}$ simulation to the 10 M$_{J}$, the gap width increases by a factor of 2 while the depth decreases from 8$\times10^{-16}$g cm$^{-3}$ to 5$\times10^{-20}$g cm$^{-3}$. Additional structure such as spiral arms or gap asymmetries also become more visible in the density profile of the disk as the planet mass increases. 
 
-
-\begin{figure*}[h]
-	\centering
-	\includegraphics[width=\linewidth]{figures/Presentation/OutFlowCross.png}
-	\caption{\label{fig:vel} Vertical inflow of gas shocking near the surface of the accreting planet, followed by the outflow of gas in the circumplanetary disk.}
-\end{figure*}
-\begin{figure*}
-	\centering
-	\includegraphics[width=\linewidth]{figures/Presentation/GasShock.png}
-	\caption{\label{fig:tshock} Vertical inflow of gas shocking near the surface of the accreting planet, followed by the outflow of gas in the circumplanetary disk.}
-\end{figure*}
+However, these properties are also highly dependant on the radial position of the planet, and are also highly viscosity dependant. The set of simulations examined in this report does not cover a sufficient population to derive planetary properties from observable disk features.
 
 %\begin{figure}
 %	\centering
@@ -661,8 +679,10 @@ In Fig. \ref{fig:gaps}, we see that both the gap widths and gap depths increase 
 
 \section{Conclusions}\label{sec:con}
 We have successfully developed a data processing tool to allow JUPITER simulations results to be visualised using Paraview or other VTK software. This will allow further exploration of the physics of circumstellar and circumplanetary disks, as the increasingly complex 3D results require adequate visualisation to understand and study. 
+
 Various visualisation and analysis techniques have been examined, including Paraview, Python VTK and matplotlib. 
 Each tool has its own strengths and weaknesses, and the choice of visualisation tool should depend on the desired outcome.
+
 In general, we recommend the use of Paraview both as an exploratory tool to examine 3 dimensional data, but also to produce high quality renders. 
 Python VTK is useful for the generation of simple, repetitive plots from a consistent dataset, and allows for a degree of automation. 
 Finally, matplotlib should be used to generate plots that maintain a consistent aesthetic with other figures in scientific works.
@@ -678,8 +698,15 @@ Thanks as well to Prof. Hans Martin Schmid for allowing me to be a part of the S
 
 I would also like to acknowledge the Kitware Inc. for supporting the open source platforms of the Visualization ToolKit (VTK)  and Paraview, upon which this work relies.
 
- 
 
+%% This command is needed to show the entire author+affilation list when
+%% the collaboration and author truncation commands are used.  It has to
+%% go at the end of the manuscript.
+%\allauthors
+
+%% Include this line if you are using the \added, \replaced, \deleted
+%% commands to see a summary list of all changes at the end of the article.
+%\listofchanges
 %% The reference list follows the main body and any appendices.
 %% Use LaTeX's thebibliography environment to mark up your reference list.
 %% Note \begin{thebibliography} is followed by an empty set of
@@ -704,51 +731,41 @@ I would also like to acknowledge the Kitware Inc. for supporting the open source
 %% of citation expression problems, but it is necessary to clearly
 %% delimit the year from the author name used in the citation.
 %% See the natbib documentation for more details and options.
-
 \bibpunct{(}{)}{;}{a}{}{,} % to follow the A&A style
 \bibliographystyle{aasjournal}
 \bibliography{biblio.bib}
 
 \begin{appendix}
-\section{Legacy VTK File Format}
-An example of a simple VTK file \cite{Formats2009}:
-\begin{lstlisting}
-# vtk DataFile Version 2.0
-Jupiter Simulation Data
-ASCII
-DATASET UNSTRUCTURED_GRID
-POINTS n double
-p$_{0x}$ p$_{0y}$ p$_{0z}$
-...
-p$_{(n-1)x}$ p$_{(n-1)y}$ p$_{(n-1)z}$
-
-CELLS m 
-nVert$_{0}$ i0 i1 i2 ... i(nVert$_{0}$-1)
-...
-nVert$_{(m-1)}$ i0 i1 i2 ... i(nVert$_{(m-1)}$-1)
-
-CELL_TYPE m 
-type$_{0}$
-..
-type$_{(m-1)}$
-
-CELL_DATA m
-SCALARS name double
-LOOKUP_TABLE default
-s$_{0}$
-...
-s$_{(m-1)}$
-\end{lstlisting}
+	\section{Legacy VTK File Format}
+	An example of a simple VTK file \cite{Formats2009}:
+	\begin{lstlisting}
+	# vtk DataFile Version 2.0
+	Jupiter Simulation Data
+	ASCII
+	DATASET UNSTRUCTURED_GRID
+	POINTS n double
+	p$_{0x}$ p$_{0y}$ p$_{0z}$
+	...
+	p$_{(n-1)x}$ p$_{(n-1)y}$ p$_{(n-1)z}$
+	
+	CELLS m 
+	nVert$_{0}$ i0 i1 i2 ... i(nVert$_{0}$-1)
+	...
+	nVert$_{(m-1)}$ i0 i1 i2 ... i(nVert$_{(m-1)}$-1)
+	
+	CELL_TYPE m 
+	type$_{0}$
+	..
+	type$_{(m-1)}$
+	
+	CELL_DATA m
+	SCALARS name double
+	LOOKUP_TABLE default
+	s$_{0}$
+	...
+	s$_{(m-1)}$
+	\end{lstlisting}
 \end{appendix}
-%% This command is needed to show the entire author+affilation list when
-%% the collaboration and author truncation commands are used.  It has to
-%% go at the end of the manuscript.
-%\allauthors
-
-%% Include this line if you are using the \added, \replaced, \deleted
-%% commands to see a summary list of all changes at the end of the article.
-%\listofchanges
-
 \end{document}
 
 % End of file `sample62.tex'.

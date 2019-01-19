@@ -37,6 +37,14 @@ Cilibrasi, M., Szulágyi, J., Mayer, L., {et~al.} 2018, Monthly Notices of the
 \bibitem[{Godunov(1959)}]{MR0119433}
 Godunov, S.~K. 1959, 47 (89), 271
 
+\bibitem[{{Hayashi}(1981)}]{MSMN}
+{Hayashi}, C. 1981, Progress of Theoretical Physics Supplement, 70, 35
+
+\bibitem[{Hockney \& Eastwood(1988)}]{hockney1988computer}
+Hockney, R., \& Eastwood, J. 1988, Computer Simulation Using Particles (CRC
+  Press).
+\newblock \url{https://books.google.ch/books?id=nTOFkmnCQuIC}
+
 \bibitem[{Sampath {et~al.}(2010)Sampath, Barai, \& Nukala}]{vcycle}
 Sampath, R.~S., Barai, P., \& Nukala, P. K. V.~V. 2010, Journal of Statistical
   Mechanics: Theory and Experiment, 2010, P03029.

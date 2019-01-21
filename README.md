@@ -32,10 +32,10 @@ or with full options:
 ```python script_Convert.py [first] [-l [last]] [grid level] [radius] [mass] [-v] [-b [binary/ascii]] [-d [dir]] [-f [field list]]```
 
 The directory should contain a folder labelled outputXXXXX, where XXXXX is the simulation output number padded to 5 digits. If multiple files are being converted, the -d argument should contain all of the output folders.
-For a full description of the arguments, type ```python script_Convert.py --help'''.
+For a full description of the arguments, type ```python script_Convert.py --help```.
 An example, for output 280, with 5 mesh levels, at 5.2 AU around a solar mass star, located in the current directory, with planet centered velocities:
 
-```python script_Convert.py 280 5 5.2 1.0 -v -d ./ -f gasdensity gasvelocity'''
+```python script_Convert.py 280 5 5.2 1.0 -v -d ./ -f gasdensity gasvelocity```
 
 See script_Convert.py for more details.
 

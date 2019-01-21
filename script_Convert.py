@@ -68,12 +68,15 @@ parser.add_argument('-b',
                     required = False,
                     help= '(b)inary or (a)scii')
 parser.add_argument('-v',
-                    '--velocity',
                     action = 'store_true',
                     required = False,
                     help= 'Planet centered velocities if included')
+
+# Which hydrodynamic fields should be converted? This must be the final argument.
 parser.add_argument('-f',
-                    '--fields',action = 'append', nargs = argparse.REMAINDER,
+                    '--fields',
+                    action = 'append',
+                    nargs = argparse.REMAINDER,
                     help= 'list of hydrodynamic fields to convert',
 	   	    required = True)
 
@@ -91,7 +94,6 @@ print "Using fields " + str(args.fields[0])
 if args.directory is not None:
     print args.directory[0]
 
-sys.exit(1)
 for i in range(args.o[0],args.last[0]+1):
     for index,f in enumerate(args.fields[0]):
         dv = DATtoVTK.DATtoVTK()

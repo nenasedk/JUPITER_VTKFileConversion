@@ -98,6 +98,7 @@ v2.1
 - Velocity calculations correct
 - Added star centered velocity function
 - Started filling in extra documentation
+
 v2.2
 - Cleaned up script_Convert.py inputs and documentation
 - Added VTKtoNumpyPlotting.py for matplotlib outputs

@@ -80,20 +80,21 @@ parser.add_argument('-f',
                     help= 'list of hydrodynamic fields to convert',
 	   	    required = True)
 
-PVEL = False
+
 args = parser.parse_args()
 
+PVEL = args.v
 if args.last is None:
     args.last = [args.o[0]]
 if args.b is None:
     args.b = ['b']
-if args.v is not None:
-    PVEL = True
+    
 print "Converting outputs from " + str(args.o[0]) + " to " + str(args.last[0])
 print "Using fields " + str(args.fields[0])
 if args.directory is not None:
     print args.directory[0]
 
+    sys.exit(1)
 for i in range(args.o[0],args.last[0]+1):
     for index,f in enumerate(args.fields[0]):
         dv = DATtoVTK.DATtoVTK()

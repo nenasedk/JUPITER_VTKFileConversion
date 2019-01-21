@@ -417,7 +417,7 @@ The program flow is as follows:
 \draw[dashed] (1) -- (3) -- (4);
 \draw[dashed] (3) -- (7);
 \end{tikzpicture}
-\caption{\label{fig:cube} Labelling of hexahedral cell vertices. 0-1 lies along the azimuthal axis, 0-3 along the radial and 0-4 along the polar axis. Each vertex is labelled using the ordering of the grid read in from file, that is the index of vertex 3 is an lenth(azimuthal axis) greater than vertex 0, where the length of the axis is the number of points in the axis. Likewise, vertex 4 iterates over both the azimuthal and radial axes, so its index is length(azimuthal axis)$\times$length(radial axis) greater than vertex 0.}
+\caption{\label{fig:cube} Labelling of hexahedral cell vertices. 0-1 lies along the azimuthal axis, 0-3 along the radial and 0-4 along the polar axis. Each vertex is labelled using the ordering of the grid read in from file, that is the index of vertex 3 is an length(azimuthal axis) greater than vertex 0, where the length of the axis is the number of points in the axis. Likewise, vertex 4 iterates over both the azimuthal and radial axes, so its index is length(azimuthal axis)$\times$length(radial axis) greater than vertex 0.}
 \end{figure}
 \textbf{Usage}
 
@@ -446,7 +446,7 @@ Tagged arguments can be placed in any order, but the field list must be the last
 Several technical challenges needed to be overcome to implement this data processing tool.
 \paragraph{Cell Counting}
 To visualise data in Paraview, cells cannot overlap, but the output from JUPITER contains overlapping cells within the ROI around the planet. 
-This creates challenges when indexing the vertices of cells, as the axss length is not constant.
+This creates challenges when indexing the vertices of cells, as the axis length is not constant.
 However, Paraview does allow grid points to occur without being used. 
 This allows us to store the full set of mesh points in the VTK file, and use a standard stride method with constant length axes to index cell vertices.
 Any cells with a vertex within the ROI are discarded, with the cell number being noted to allow for removal of the datapoint.
@@ -481,7 +481,7 @@ The render view of the Paraview user interface is shown in Fig. \ref{fig:pviewin
 Once a VTK file has been produced by the conversion tool, it can be opened in Paraview, where he user may then select a suitable colour map for the data. 
 Best practices should be followed when producing publication-ready visualisations. Colour hue and brightness should be considered to allow for accessible images that can convey the content of the data. A large range in brightness and hue will allow small variations in the data to be more visible. 
 The luminosity should be consistent across the colour range, so as not to emphasise certain features and to maintain even perception of colour intensity. 
-Many pre-made colour palettes are available in Paraview, including standard matplotlib palettes commonly used in python or matlab visualisations, allowing for standardisation across various tools.
+Many pre-made colour palettes are available in Paraview, including standard matplotlib palettes commonly used in python or Matlab visualisations, allowing for standardisation across various tools.
 Opacity scaling, and logarithmic colour scales are also useful tools when visualising complex data.
 
 \begin{figure}
@@ -535,10 +535,10 @@ Slice the data along the desired axis to produce a 2D surface plot, and clip the
 Filter parameters can be copied and pasted, so identical filters can be applied to both datasets.
 Choose a colourmap and scale for the temperature field, and label the colourbar axis. 
 Ensure the axis are visible, properly labelled and with a reasonable font size chosen.
-Apply the CellDataToPointData filter to the scliced and clipped velocity data, followed by the surface vector filter.
+Apply the CellDataToPointData filter to the sliced and clipped velocity data, followed by the surface vector filter.
 Finally, generate a stream plot, and colour the streams with the magnitude of the velocity.
 Ensure the render background is white, and position the colourbars where desired. Save the scene in the desired file format, or export as a png screenshot. 
-Note that both of these output options may not exactly reproduce the render view, so check the final output to ensure consistancy.
+Note that both of these output options may not exactly reproduce the render view, so check the final output to ensure consistency.
 The output of this procedure should resemble Fig. \ref{fig:tshock}.%\ref{FIXME}.
 
 \subsection{VTK Python}\label{sec:pyvtk}
@@ -587,7 +587,7 @@ The use of these tools also relies upon the VTK python library, and an understan
 As matplotlib style plots are relatively standard, we developed a python program to take in the VTK files and output matplotlib plots.
 The data is read in and processed as described in \S \ref{sec:pyvtk} above. 
 The data must be sliced and cut using the VTK filters prior to conversion.
-Once filtered and passed to a \verb|CellDataToPointData| mapper, the mapper output can be converted to numpy arrays using the \verb|vt_to_numpy| function.
+Once filtered and passed to a \verb|CellDataToPointData| mapper, the mapper output can be converted to numpy arrays using the \verb|vtk_to_numpy| function.
 The point coordinate grid can likewise be converted to a numpy array, and read into Cartesian axes. 
 
 \begin{figure}
@@ -634,9 +634,14 @@ For the opacity calculation, the dust-to-gas ratio of the disk was set to the st
 	\caption{\label{fig:gaps}Variation of gap widths and depths over a range of embedded planetary masses. The colour scale is in units of g cm$^{-3}$. From 1 M$_{J}$ to 10 M$_{J}$, the gap width increases by a factor of 2, while the depth decreases from 8$\times10^{-16}$g cm$^{-3}$ to 5$\times10^{-20}$g cm$^{-3}$.}
 \end{figure}
 
+\begin{figure}[htb!]
+	\centering
+	\includegraphics[width=0.95\linewidth]{figures/Presentation/OutFlowMidPlane.png}
+	\caption{\label{fig:ofmid} Radial outflow of gas through the CPD, planet mass is 1 M${_J}$ located at 5.2AU.}
+\end{figure}
 \subsubsection{Circumplanetary disk flow}
 
-During planet formation, the planet attracts gas and dust from the local environment. The JUPITER simulations show that this flow of material towards the planet is primarily from the vertical directions, Fig. \ref{fig:vel}. Gas from the edges of the gap where the CPD is embedded flows accelerates vertically towards accreting planet. As the gas in the region of the planet is adiabatically compressed, it heats up and forms a high pressure region surrounding the planet. The inflowing gas shocks on this region, forming a high temperature discontinuity, and losing most of its velocity Fig. \ref{fig:tshock}. Some of the material is then accreted onto the planet, while the majority flows outward in the CPD, before being recycled into the circumstellar disk, Fig. \ref{fig:recirc}. The strength of this shock, along with the sharpness of the density discontinuity of the CPD and the gap in general will vary with both the planet mass and initial temperature. An exploration of the structure of CPDs can be found in \cite{Szulagyi2016}.
+During planet formation, the planet attracts gas and dust from the local environment. The JUPITER simulations show that this flow of material towards the planet is primarily from the vertical directions, Fig. \ref{fig:vel}. Gas from the edges of the gap where the CPD is embedded flows accelerates vertically towards accreting planet. As the gas in the region of the planet is adiabatically compressed, it heats up and forms a high pressure region surrounding the planet. The inflowing gas shocks on the upper boundary of the CPD near this region, forming a high temperature discontinuity, and losing most of its velocity Fig. \ref{fig:tshock}. Some of the material is then accreted onto the planet, while the majority flows outward in the CPD, Fig. \ref{fig:ofmid}, before being recycled into the circumstellar disk, Fig. \ref{fig:recirc}. The strength of this shock, along with the sharpness of the density discontinuity of the CPD and the gap in general will vary with both the planet mass and initial temperature. An exploration of the structure of CPDs can be found in \cite{Szulagyi2016}.
  
 \renewcommand{\topfraction}{1}
 \renewcommand{\bottomfraction}{1}
@@ -644,20 +649,20 @@ During planet formation, the planet attracts gas and dust from the local environ
 \begin{figure*}[htb!]
 	\centering
 	\includegraphics[width=0.95\linewidth]{figures/Presentation/GasShock.png}
-	\caption{\label{fig:tshock} High temperature shock near the surface of the accreting 1 M$_{J}$ planet planet. After shocking on the high pressure region surrounding the planet, the inflowing gas loses most of its energy and spirals out in the CPD.}
+	\caption{\label{fig:tshock} High temperature shock near the surface of the accreting 1 M$_{J}$ planet. After shocking upper boundary of the CPD, the inflowing gas loses some of its energy and spirals out in the CPD.}
 \end{figure*}
 
 \subsubsection{Dust traps and implications for satellite formation}
 
 Visible in Figs.  \ref{fig:vel} and \ref{fig:tshock}, there are regions where inflowing gas from the circumstellar disk and outflowing gas from the CPD meet.
- Inflowing gas from the gap walls flows over this high pressure region and the CPD, forming a vortex on the upper edge of the CPD. This forms a circular ring around the CPD that acts as a dust trap, providing an ideal location for satellite formation.  According to \cite{satellite}, the dust-to-gas ratio in the dust trap can increase to 1 or greater. While beyond the scope of this report to analyse this phenomena in detail, it is discussed at length in \cite{satellite}.
+Inflowing gas from the gap walls flows over this high pressure region and the CPD, forming a vortex at approximately 20 planet radii from the planet. This forms a circular ring that acts as a dust trap, providing an ideal location for satellite formation.  According to \cite{satellite}, the dust-to-gas ratio in the dust trap can increase to 1 or greater. While beyond the scope of this report to analyse this phenomena in detail, it is discussed at length in \cite{satellite}.
 
 \subsubsection{Gap profiles}
 
 In addition to the flow analysis, we can also examine the gap properties that arise from planet-disk interactions. 
 In Fig. \ref{fig:gaps}, we see that both the gap widths and gap depths increase as the planet mass increases. Comparing the 1 M$_{J}$ simulation to the 10 M$_{J}$, the gap width increases by a factor of 2 while the depth decreases from 8$\times10^{-16}$g cm$^{-3}$ to 5$\times10^{-20}$g cm$^{-3}$. Additional structure such as spiral arms or gap asymmetries also become more visible in the density profile of the disk as the planet mass increases. 
 
-However, these properties are also highly dependant on the radial position of the planet, and are also highly viscosity dependant. The set of simulations examined in this report does not cover a sufficient population to derive planetary properties from observable disk features.
+However, these properties are also highly dependant on the radial position of the planet, and are also highly viscosity dependant. Other studies have shown that planetary properties can be derived from observed disk features.
 
 %\begin{figure}
 %	\centering
@@ -689,7 +694,7 @@ Finally, matplotlib should be used to generate plots that maintain a consistent 
 
 We also present a qualitative analysis of several simulations. 
 We note the flow patterns in 3 dimensional simulations are inconsistent with traditional 1D planet formation models, but may represent a more realistic scenario of gas flow.
-We also demonstrate that planet properties will have an effect on the observational properties of protoplanetary disks, but do not have sufficient evidence to be able to derive planetary properties from these observations.
+We also demonstrate that planet properties will have an effect on the observational properties of protoplanetary disks, though the derivation of planetary properties from disk features is not a subject of this report.
 
 \section{Acknowledgements}
 I would like to sincerely thank my supervisor Dr. Judit Szul\'{a}gyi for her guidance, mentorship and patience during this project.

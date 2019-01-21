@@ -6,34 +6,74 @@
 # with optional arguments:
 # python script_convert.py [first] [grid level] [radius] [mass] -l [last] [-v] -b [binary/ascii] -d [dir] -f [field list]
 #
-# The list of fields must always be the final argument. 
+# The list of fields MUST always be the final argument.
+#
+# If converting multiple files, it is recommended to write a bash script to
+# automate calling this module multiple times.
 import DATtoVTK
 import argparse
 import sys
 import string
 
-parser = argparse.ArgumentParser(description='dat to vtk file conversion')
-parser.add_argument('o',action = 'store',nargs = 1,type = int,
+parser = argparse.ArgumentParser(description='dat to VTK file conversion')
+
+# Output numbers
+parser.add_argument('o',
+                    action = 'store',
+                    nargs = 1,
+                    type = int,
                     metavar = 'first_out',
-                    help= 'first simulation output to convert')
-parser.add_argument('g',action = 'store',nargs = 1,type = int,
-                    metavar = 'grid_level',
-                    help= 'number of grid refinement levels')
-parser.add_argument('-l', "--last",action ='store',nargs = 1,type = int,
-                    metavar = 'last_out', required = False,
+                    help= 'First simulation output to convert.')
+parser.add_argument('-l',
+                    "--last",
+                    action ='store',
+                    nargs = 1,
+                    type = int,
+                    metavar = 'last_out',
+                    required = False,
                     help= 'last simulation output to convert')
-parser.add_argument('r',action = 'store',nargs = 1,type = float,
-                    metavar = 'radius', help= 'planetary orbital radius')
-parser.add_argument('m',action = 'store',nargs = 1,type = float,
-                    metavar = 'mass', help= 'stellar mass')
-parser.add_argument('-d',"--directory",action = 'store', nargs = 1,
+parser.add_argument('g',
+                    action = 'store',
+                    nargs = 1,type = int,
+                    metavar = 'grid_level',
+                    help= 'Number of grid refinement levels')
+
+# Science
+parser.add_argument('r',
+                    action = 'store',
+                    nargs = 1,
+                    type = float,
+                    metavar = 'radius',
+                    help= 'Planetary orbital radius in AU')
+parser.add_argument('m',action = 'store',
+                    nargs = 1,
+                    type = float,
+                    metavar = 'mass',
+                    help= 'Stellar mass in solar mass units.')
+
+# Directory to output folders
+# For now, ALL output folders must located in the same directory.
+parser.add_argument('-d',
+                    "--directory",
+                    action = 'store',
+                    nargs = 1,
 		    required = False,	
                     help= "Directory to output folders, should contain a folder labelled outputXXXXX, where XXXXX is the simulation output number padded to 5 digits.")
-parser.add_argument('-b',action = 'store', nargs = 1, metavar = 'binary', required = False,
+
+# DAT_to_VTK arguments
+parser.add_argument('-b',
+                    action = 'store',
+                    nargs = 1,
+                    metavar = 'binary',
+                    required = False,
                     help= '(b)inary or (a)scii')
-parser.add_argument('-v', action = 'store_true',required = False,
+parser.add_argument('-v',
+                    '--velocity',
+                    action = 'store_true',
+                    required = False,
                     help= 'Planet centered velocities if included')
-parser.add_argument('-f','--fields',action = 'append', nargs = argparse.REMAINDER,
+parser.add_argument('-f',
+                    '--fields',action = 'append', nargs = argparse.REMAINDER,
                     help= 'list of hydrodynamic fields to convert',
 	   	    required = True)
 
@@ -48,7 +88,10 @@ if args.v is not None:
     PVEL = True
 print "Converting outputs from " + str(args.o[0]) + " to " + str(args.last[0])
 print "Using fields " + str(args.fields[0])
-print args.directory[0]
+if args.directory is not None:
+    print args.directory[0]
+
+sys.exit(1)
 for i in range(args.o[0],args.last[0]+1):
     for index,f in enumerate(args.fields[0]):
         dv = DATtoVTK.DATtoVTK()

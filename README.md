@@ -21,13 +21,21 @@ The class can be run from the Convert.py script
 
 ```python Convert.py```
 
-Alternatively
+Alternatively, the script_Convert program can be used from the command line. 
+The following lists the required arguments. 
+Note that the field list argument MUST be the final argument in the command.
 
-```python script_Convert.py [first] [grid_level] [radius] [mass] -f [field list]```
+```python script_Convert.py [first] [grid_level] [radius] [mass] [-f [field list]]```
 
 or with full options:
 
-```python script_Convert.py [first] [grid level] [radius] [mass] -l [last] [-v] -b [binary/ascii] -d [dir] -f [field list]```
+```python script_Convert.py [first] [-l [last]] [grid level] [radius] [mass] [-v] [-b [binary/ascii]] [-d [dir]] [-f [field list]]```
+
+The directory should contain a folder labelled outputXXXXX, where XXXXX is the simulation output number padded to 5 digits. If multiple files are being converted, the -d argument should contain all of the output folders.
+For a full description of the arguments, type ```python script_Convert.py --help'''.
+An example, for output 280, with 5 mesh levels, at 5.2 AU around a solar mass star, located in the current directory, with planet centered velocities:
+
+```python script_Convert.py 280 5 5.2 1.0 -v -d ./ -f gasdensity gasvelocity
 
 See script_Convert.py for more details.
 
@@ -54,6 +62,11 @@ It is converted to Cartesian coordinates to be written to the VTK file.
 
 On importing the coordinate grid it is changed from left handed to right 
 handed (azimuthal and polar angles)*-1
+
+## Matplotlib visualisation
+The VTKtoNumpyPlotting.py module contains functions that can be used to read in VTK data and output a matplotlib style figure.
+This module may be used as a template for numpy plotting, but note that the user will be required to modify the script so as to filter the data as necessary. 
+It is recommended only to use the matplotlib visualisations for 2D contour plots, as vector and streamline plots do not produce useful results.
 
 ## Known Issues
 
@@ -85,3 +98,9 @@ v2.1
 - Velocity calculations correct
 - Added star centered velocity function
 - Started filling in extra documentation
+v2.2
+- Cleaned up script_Convert.py inputs and documentation
+- Added VTKtoNumpyPlotting.py for matplotlib outputs
+- Fixed default velocities settings in DAT_to_VTK
+- Added pipenv environment
+- Updates to report and documentation

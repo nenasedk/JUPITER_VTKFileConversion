@@ -231,7 +231,7 @@ class DATtoVTK:
     # This function wraps the binary .dat file reader for a given feature,
     # and output for the field in a VTK format. This is the only user facing function.
     # --------------------------------------------------------------------------------------------
-    def ConvertFiles( self , binary = True , planet_centered = True):
+    def ConvertFiles( self , binary = True , planet_centered = False):
         self.GetCoordinates()
         inds = self.ComputeIndices()
         data = np.array([]) 

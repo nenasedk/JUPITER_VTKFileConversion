@@ -252,14 +252,14 @@
 %% tied to the reference list via symbolic KEYs. The KEY corresponds
 %% to the KEY in the \bibitem in the reference list below. 
 \section{Introduction}\label{sec:intro}
-Hydrodynamic simulations are one of the key tools used in understanding the formation and evolution of planets. 
-They provide insights into the environment of the circumstellar and circumplanetary disks, allowing for the study of the accretion process and modelling the effects of planet-disk interactions.
-As observations lack the resolution to study small scale effects or are hindered by the optical thickness of disks, these models provide a unique means of studying these processes. 
+Hydrodynamic simulations are one of the tools used in understanding the formation and evolution of planets. 
+They provide insight into the environment of the circumstellar and circumplanetary disks, allowing for the study of the accretion process and modelling the effects of planet-disk interactions.
+As observations lack the resolution to study small scale effects in circumplanetary disks or are hindered by the optical thickness of circumstellar disks, these models provide a unique means of studying these processes. 
 
 Modern techniques are 3-dimensional, and produce large datasets that require significant processing and analysis to be interpreted.
 This report examines the software developed to process JUPITER hydrodynamic simulation outputs to allow for visualisation using a variety of tools.
 \subsection{JUPITER}\label{sec:jup}
-JUPITER is a 3D, nested mesh, simulation program that solves the hydrodynamic and radiative transfer equations using a high order \cite{MR0119433} scheme described in \cite{Szulagyi2016} \cite{Szulagyi2014} and \cite{DeVal-Borro2006}. 
+JUPITER is a 3D, nested mesh simulation program that solves the hydrodynamic and radiative transfer equations using a high order \cite{MR0119433} scheme described in \cite{Szulagyi2016,Szulagyi2014,DeVal-Borro2006}. 
 This allows a spatial resolution of about 0.8 Jupiter radii at the finest mesh level. 
 The radiative transfer is calculated with the method of \cite{comm2011}, with Dirichlet boundary conditions on the boundaries between mesh levels.
 Thus JUPITER solves for mass and momentum conservation, along with total energy, accounting for coupling between thermal and radiative energy ($\epsilon_{rad}$). The governing equations for the program are therefore as in \cite{Szulagyi2016}:
@@ -290,7 +290,7 @@ F_{rad} = -\frac{c\lambda}{\rho\kappa_{R}}\nabla\epsilon_{rad}
 $\kappa_{R}$ is the Rosseland mean opacity, and $\lambda$ is a flux limiter to smooth the transition between optically thick and thin regions, also defined in \cite{Bitsch2013}.
 
 The equation of state of the system is taken to be 
-\begin{equation}
+\begin{equation}\label{eqn:eos}
 P = \left(\gamma - 1\right)\epsilon
 \end{equation}
 where $\epsilon = \rho c_{v}T$ and the adiabatic index $\gamma = 1.43$.
@@ -617,7 +617,7 @@ With the conversion tool developed, we can present several examples of possible 
 
 
 These simulations primarily consist of 100AU radius circumstellar disks with a single embedded planet of varying mass at 50AU.
-The gas in the simulations is considered to be ideal, with an equation of state $P = (\gamma - 1)E_{int}$, with $\gamma$ = 1.43, while the mean molecular weight was 2.43.
+The gas in the simulations is considered to be ideal, with an equation of state and adiabatic coefficient as in Eqn. \ref{eqn:eos}
 The kinematic viscosity of the simulations is low, with a value of $10^{-5}a^{2}\Omega_{p}$, or $\alpha \approx 0.004$ at R$_{p}$. The density is close to that of a Minimum Mass Solar Nebula \cite{MSMN}. 
 The initial disk aspect ratio was set to H/r = 0.05, where H is the pressure scale-height of the disk. 
 The upper surface of the disk is radiatively heated from stellar flux.

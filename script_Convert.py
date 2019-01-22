@@ -50,7 +50,12 @@ parser.add_argument('m',action = 'store',
                     type = float,
                     metavar = 'mass',
                     help= 'Stellar mass in solar mass units.')
-
+parser.add_argument('-u',
+                    "--units",
+                    action = 'store',
+                    nargs = 1,
+		    required = False,	
+                    help= "Units can be one of CGS or AU, defaulting to CGS.")
 # Directory to output folders
 # For now, ALL output folders must located in the same directory.
 parser.add_argument('-d',
@@ -82,24 +87,25 @@ parser.add_argument('-f',
 
 
 args = parser.parse_args()
-
+UNITS = "CGS"
 PVEL = args.v
 if args.last is None:
     args.last = [args.o[0]]
 if args.b is None:
     args.b = ['b']
-    
+if args.units is not None:
+    UNITS = args.units[0]
 print "Converting outputs from " + str(args.o[0]) + " to " + str(args.last[0])
 print "Using fields " + str(args.fields[0])
 if args.directory is not None:
     print args.directory[0]
 
-    sys.exit(1)
 for i in range(args.o[0],args.last[0]+1):
     for index,f in enumerate(args.fields[0]):
         dv = DATtoVTK.DATtoVTK()
         dv.SetOutNumber(i)
         dv.SetLevel(args.g[0])
+        dv.SetUnits(UNITS)
         dv.SetRadius(args.r[0])
         dv.SetMass(args.m[0])
         dv.SetFeature(f)

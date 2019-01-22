@@ -132,7 +132,7 @@ class DATtoVTK:
     def SetInFilename(self,fname):
         self.inFilename = fname
 
-    def SetUnits(units):
+    def SetUnits(self, units):
         ulist = ["CGS","cgs","AU","Au","au"]
         if units in ulist:
             self.units = units
@@ -163,9 +163,9 @@ class DATtoVTK:
         # 8.314e7 - cgs gas constant
         if units == "AU" or units == "Au" or units == "au":
             self.TEMP = ((self.rcgs.value)/(np.sqrt((self.rcgs.value)**3 / 6.67259e-8 / (self.mcgs.value))))**2 / 8.314e7
-            self.DENS = self.mass/(self.radius)**3
+            self.DENS = self.mcgs.value/(self.rcgs.value)**3
             self.PERIOD = 2*np.pi*np.sqrt((self.rcgs.value)**3 / (6.67259e-8 * self.mcgs.value))
-            self.VEL = self.radius/(self.PERIOD/2*np.pi)
+            self.VEL = self.rcgs.value/(self.PERIOD/2*np.pi)
             self.rcgs = self.radius
             self.mcgs = self.mass
         else:    

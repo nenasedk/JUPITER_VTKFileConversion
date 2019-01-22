@@ -29,9 +29,10 @@ Note that the field list argument MUST be the final argument in the command.
 
 or with full options:
 
-```python script_Convert.py [first] [-l [last]] [grid level] [radius] [mass] [-v] [-b [binary/ascii]] [-d [dir]] [-f [field list]]```
+```python script_Convert.py [first] [-l [last]] [grid level] [radius] [mass] [-v] [-b [binary/ascii]] [-d [dir]] [-u [units]] [-f [field list]]```
 
 The directory should contain a folder labelled outputXXXXX, where XXXXX is the simulation output number padded to 5 digits. If multiple files are being converted, the -d argument should contain all of the output folders.
+Units can be "CGS" or "AU"
 For a full description of the arguments, type ```python script_Convert.py --help```.
 An example, for output 280, with 5 mesh levels, at 5.2 AU around a solar mass star, located in the current directory, with planet centered velocities:
 

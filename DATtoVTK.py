@@ -413,9 +413,9 @@ class DATtoVTK:
         newcoords = np.zeros(data.shape)
         i = 0
         for ind in inds: 
-            x = (self.mesh[ind[0]][0] + self.mesh[ind[0]+1][0])/2.0 # Azimuth
-            y = (self.mesh[ind[0]][1] + self.mesh[ind[3]][1])/2.0   # Radial
-            z = (self.mesh[ind[0]][2] + self.mesh[ind[4]][2])/2.0   # Polar
+            x = (self.mesh[ind[0]][0] + self.mesh[ind[0]+1][0])/2.0 # x
+            y = (self.mesh[ind[0]][1] + self.mesh[ind[3]][1])/2.0   # y
+            z = (self.mesh[ind[0]][2] + self.mesh[ind[4]][2])/2.0   # z
 
             # Shift to planet centered reference frame
             x = x - self.rcgs.value
@@ -424,6 +424,7 @@ class DATtoVTK:
             # So I don't have to change any of the rest of the math
             phi = sph[0][0]
             rad = sph[0][1]
+            rad = rad*u.AU.to(u.cm)
             tht = sph[0][2]
             
             # 0 = az (phi), 1 = rad, 2 = pol (tht)  Use this one, velocity ordering is(n't) weird
@@ -453,6 +454,7 @@ class DATtoVTK:
         for ind in inds:
             phi = (self.unfiltered[ind[0]][0] + self.unfiltered[ind[0]+1][0])/2.0 # Azimuth
             rad = (self.unfiltered[ind[0]][1] + self.unfiltered[ind[3]][1])/2.0   # Radial
+            rad = rad*u.AU.to(u.cm)
             tht = (self.unfiltered[ind[0]][2] + self.unfiltered[ind[4]][2])/2.0   # Polar
 
             # 0 = az (phi), 1 = rad, 2 = pol (tht)  Use this one, velocity ordering is(n't) weird

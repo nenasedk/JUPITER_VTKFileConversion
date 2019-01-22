@@ -424,7 +424,7 @@ class DATtoVTK:
             # So I don't have to change any of the rest of the math
             phi = sph[0][0]
             rad = sph[0][1]
-            rad = rad*u.AU.to(u.cm)
+            rad = rad/(1.0*u.AU.to(u.cm).value)
             tht = sph[0][2]
             
             # 0 = az (phi), 1 = rad, 2 = pol (tht)  Use this one, velocity ordering is(n't) weird

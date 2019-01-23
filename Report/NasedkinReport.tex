@@ -425,7 +425,7 @@ To use the command line interface simply use \verb|python Convert.py|.
 Within the Convert.py script, the user can change whether to output to a binary or ascii VTK file, as well as the location of the input data from JUPITER. This data must be in a folder labelled outputXXXXX where the X's denote the simulation output number with leading zeros. The default path to this directory is the current working directory.
 
 A second interface has been developed to allow for easier bash scripting. To use this, enter the following into the command line or a bash script:
-\verb|python script_Convert.py [first]\|\newline \verb|[grid level] [radius] [mass]|\newline \verb|[-l [last]] [-v]\| \newline \verb|[-b [binary/ascii]] [-d[dir]]\ |\newline\verb|[-f [field list]]|
+\verb|python script_Convert.py [first]\|\newline \verb|[grid level] [radius] [mass]|\newline \verb|[-l [last]] [-v]\| \newline \verb|[-b [binary/ascii]] [-d[dir]]\ |\newline\verb|[-u [units]] [-f [field list]]|
 
 Or without all of the optional tagged arguments:\newline
 \verb|python script_Convert.py [first]\|\newline \verb|[grid_level] [radius] [mass]\|\newline \verb|[-f [field list]]|
@@ -438,6 +438,7 @@ Tagged arguments can be placed in any order, but the field list must be the last
 	\item \verb|[radius]| The orbital radius of the planet in AU.
 	\item \verb|[mass]| The mass of the star in solar masses.
 	\item \verb|[-v]| Include if velocities should be planet centred. 
+	\item \verb|[-u [units]| Select "CGS" or "AU" units.
 	\item \verb|[-b [binary/ascii]]| A string (b)inary or (a)scii to set the output file type. Binary is recommended, and is the default value.
 	\item \verb|[-d [dir]]| Directory where the output folder from JUPITER is located
 	\item \verb|[-f [field_list]]| A list of space separated strings denoting which hydro fields should be converted.
